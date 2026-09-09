@@ -171,12 +171,13 @@ export default function CproHubLanding() {
       <section id="home" className="relative pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-20 overflow-visible bg-[#061224]">
         {/* Panoramic Background with Worker & Sunny Construction Site */}
         <div 
-          className="absolute inset-0 bg-cover bg-no-repeat bg-[position:80%_top] sm:bg-[position:center_top] lg:bg-center"
+          className="absolute inset-0 bg-cover bg-no-repeat bg-center sm:bg-[position:center_top] lg:bg-center pointer-events-none"
           style={{ backgroundImage: `url('/cprohub-hero-banner.jpg')` }}
         />
-        {/* Deep dark navy gradient on left to guarantee crisp text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#061224] via-[#061224]/85 to-transparent lg:via-[#061224]/65" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#061224] via-transparent to-transparent lg:hidden" />
+        {/* Seamless overlay system - eliminates horizontal banding & sharp cutoffs on mobile */}
+        <div className="absolute inset-0 bg-[#061224]/70 sm:bg-[#061224]/40 lg:bg-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#061224] via-[#061224]/90 to-[#061224]/50 lg:via-[#061224]/65 lg:to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#061224]/90 via-[#061224]/20 to-[#061224] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 items-center">
