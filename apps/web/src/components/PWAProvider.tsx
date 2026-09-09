@@ -129,6 +129,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
   const installPWA = async () => {
     if (!deferredPrompt) {
       setShowInstructions(true);
+      setShowPopup(true);
       return;
     }
     try {
@@ -141,6 +142,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
       setShowPopup(false);
     } catch (err) {
       setShowInstructions(true);
+      setShowPopup(true);
     }
   };
 
