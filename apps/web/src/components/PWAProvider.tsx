@@ -147,6 +147,9 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const isInstallable = !isStandalone;
+  const isCproHub = typeof window !== 'undefined' && window.location.pathname.includes('cprohub');
+  const appName = isCproHub ? 'CproHub' : 'Cpromark';
+  const appLogo = isCproHub ? '/cprohub-logo.jpeg' : '/cpromark-logo.png';
 
   return (
     <PWAContext.Provider
@@ -161,182 +164,126 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
     >
       {children}
 
-      {/* Global Installation Modal */}
+      {/* Non-Blocking Top-Right Installation Popover */}
       <AnimatePresence>
         {showPopup && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+          <div className="fixed inset-0 pointer-events-none z-[9999]">
+            {/* Transparent click-outside dismisser (no dark background cover) */}
+            <div
+              className="absolute inset-0 pointer-events-auto"
               onClick={() => setShowPopup(false)}
-              className="absolute inset-0 bg-background/80 backdrop-blur-md"
             />
 
-            {/* Modal Box */}
+            {/* Popover Form Card */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, y: -15, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="relative w-full max-w-md bg-card/95 border border-border/80 shadow-2xl rounded-[2.5rem] overflow-hidden p-6 sm:p-8 text-foreground"
+              className="pointer-events-auto absolute top-16 sm:top-20 right-3 sm:right-6 w-[340px] max-w-[calc(100vw-1.5rem)] bg-[#0B182B]/98 text-white border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl rounded-2xl p-4 sm:p-5 z-10"
             >
-              {/* Close Button */}
+              {/* Close 'X' Button */}
               <button
                 onClick={() => setShowPopup(false)}
-                className="absolute top-5 right-5 p-2 bg-muted hover:bg-muted/80 rounded-full transition-all text-muted-foreground hover:text-foreground cursor-pointer"
-                aria-label="Close modal"
+                className="absolute top-3.5 right-3.5 p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+                aria-label="Close"
               >
-                <X size={16} />
+                <X size={15} />
               </button>
 
-              {/* Top Decorative Glow */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200px] h-[200px] bg-primary/10 blur-[50px] rounded-full pointer-events-none" />
-
-              {/* Logo / Badge */}
-              <div className="w-16 h-16 bg-white border border-border rounded-2xl flex items-center justify-center mb-6 shadow-lg overflow-hidden shrink-0">
-                <img src="/cpromark-logo.png" alt="CproHub Logo" className="w-12 h-12 object-contain" />
+              {/* App Header */}
+              <div className="flex items-center gap-3 mb-3.5 pr-6">
+                <div className="w-10 h-10 rounded-xl bg-white border border-white/20 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+                  <img src={appLogo} alt={`${appName} Logo`} className="w-8 h-8 object-contain" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-white leading-tight">Install {appName}</h4>
+                  <p className="text-[11px] font-medium text-slate-300">Quick launch & offline access</p>
+                </div>
               </div>
 
               {isIOS ? (
                 /* iOS Safari instructions */
-                <div>
-                  <h3 className="text-2xl font-black tracking-tight mb-2">
-                    Install CproHub on iOS
-                  </h3>
-                  
-                  <p className="text-muted-foreground text-sm font-medium mb-6">
-                    Add CproHub to your Home Screen for a premium app-like experience with quick access and full-screen workspace.
+                <div className="space-y-3">
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    Install {appName} on your Home Screen via Safari:
                   </p>
-
-                  <div className="space-y-4 bg-muted/50 border border-border/60 rounded-3xl p-5 mb-6">
-                    <div className="flex gap-4 items-start">
-                      <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <Share size={16} />
+                  <div className="space-y-2 bg-white/5 border border-white/10 rounded-xl p-3 text-[11px]">
+                    <div className="flex items-center gap-2 text-slate-200">
+                      <div className="w-6 h-6 rounded-lg bg-[#FFC107]/20 text-[#FFC107] flex items-center justify-center shrink-0">
+                        <Share size={13} />
                       </div>
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-wider text-muted-foreground">Step 1</p>
-                        <p className="text-sm font-bold text-foreground">
-                          Tap the <span className="font-extrabold text-primary">Share</span> button in the Safari navigation bar.
-                        </p>
-                      </div>
+                      <span>1. Tap <strong className="text-white">Share</strong> in Safari</span>
                     </div>
-
-                    <div className="flex gap-4 items-start border-t border-border/40 pt-4">
-                      <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <Plus size={16} />
+                    <div className="flex items-center gap-2 text-slate-200 border-t border-white/10 pt-2">
+                      <div className="w-6 h-6 rounded-lg bg-[#FFC107]/20 text-[#FFC107] flex items-center justify-center shrink-0">
+                        <Plus size={13} />
                       </div>
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-wider text-muted-foreground">Step 2</p>
-                        <p className="text-sm font-bold text-foreground">
-                          Scroll down the share sheet options and select <span className="font-extrabold text-primary">"Add to Home Screen"</span>.
-                        </p>
-                      </div>
+                      <span>2. Select <strong className="text-white">Add to Home Screen</strong></span>
                     </div>
                   </div>
-
                   <button
                     onClick={() => setShowPopup(false)}
-                    className="w-full bg-primary text-brand-navy py-4 rounded-2xl text-sm font-black shadow-yellow hover:bg-primary-dim active:scale-[0.98] transition-all cursor-pointer text-center block"
+                    className="w-full bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 py-2.5 rounded-xl text-xs font-black shadow-md transition-all cursor-pointer text-center"
                   >
                     Got It
                   </button>
                 </div>
               ) : showInstructions ? (
                 /* Desktop/Android manual instructions fallback */
-                <div>
-                  <h3 className="text-2xl font-black tracking-tight mb-2">
-                    How to Install CproHub
-                  </h3>
-
-                  <p className="text-muted-foreground text-sm font-medium mb-6">
-                    Add CproHub to your desktop or mobile device for quick launch and offline capabilities.
-                  </p>
-
-                  <div className="space-y-4 bg-muted/50 border border-border/60 rounded-3xl p-5 mb-6">
-                    <div className="flex gap-4 items-start">
-                      <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <Monitor size={16} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-wider text-muted-foreground">On Desktop (Chrome/Edge)</p>
-                        <p className="text-sm font-bold text-foreground">
-                          Look for the <span className="font-extrabold text-primary">Install</span> icon in the right side of the address bar, or click the browser menu (three dots) and select <span className="font-extrabold text-primary">"Install CproHub"</span>.
-                        </p>
-                      </div>
+                <div className="space-y-3">
+                  <div className="space-y-2 bg-white/5 border border-white/10 rounded-xl p-3 text-[11px]">
+                    <div className="flex items-center gap-2 text-slate-200">
+                      <Monitor size={14} className="text-[#FFC107] shrink-0" />
+                      <span><strong>Desktop:</strong> Click the install icon in your address bar</span>
                     </div>
-
-                    <div className="flex gap-4 items-start border-t border-border/40 pt-4">
-                      <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <Smartphone size={16} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-wider text-muted-foreground">On Mobile (Android)</p>
-                        <p className="text-sm font-bold text-foreground">
-                          Tap the browser menu <span className="font-extrabold text-primary">(three dots)</span> on the top-right and select <span className="font-extrabold text-primary">"Install app"</span> or <span className="font-extrabold text-primary">"Add to Home screen"</span>.
-                        </p>
-                      </div>
+                    <div className="flex items-center gap-2 text-slate-200 border-t border-white/10 pt-2">
+                      <Smartphone size={14} className="text-[#FFC107] shrink-0" />
+                      <span><strong>Mobile:</strong> Tap browser menu &gt; <em>Install App</em></span>
                     </div>
                   </div>
-
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     <button
                       onClick={() => setShowInstructions(false)}
-                      className="flex-1 bg-muted text-foreground hover:bg-muted/80 py-4 rounded-2xl text-sm font-black transition-all cursor-pointer text-center"
+                      className="flex-1 bg-white/10 hover:bg-white/15 text-white py-2 rounded-xl text-xs font-bold transition-all cursor-pointer"
                     >
                       Back
                     </button>
                     <button
                       onClick={() => setShowPopup(false)}
-                      className="flex-1 bg-primary text-brand-navy py-4 rounded-2xl text-sm font-black shadow-yellow hover:bg-primary-dim active:scale-[0.98] transition-all cursor-pointer text-center"
+                      className="flex-1 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 py-2 rounded-xl text-xs font-black transition-all cursor-pointer"
                     >
                       Done
                     </button>
                   </div>
                 </div>
               ) : (
-                /* Android / Desktop Install Prompt */
+                /* Standard Prompt */
                 <div>
-                  <h3 className="text-2xl font-black tracking-tight mb-2">
-                    Download CproHub App
-                  </h3>
-
-                  <p className="text-muted-foreground text-sm font-medium mb-6">
-                    Get the native-like experience with offline capabilities, notifications, and lightning-fast launching.
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="bg-muted/50 border border-border/50 rounded-2xl p-4 flex flex-col gap-2 items-center text-center">
-                      <Smartphone size={20} className="text-primary" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Mobile App</span>
-                    </div>
-                    <div className="bg-muted/50 border border-border/50 rounded-2xl p-4 flex flex-col gap-2 items-center text-center">
-                      <Monitor size={20} className="text-primary" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Desktop App</span>
-                    </div>
+                  <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl p-2.5 mb-3.5 text-[11px] text-slate-300">
+                    <Smartphone size={14} className="text-[#FFC107] shrink-0" />
+                    <span>Works offline with real-time project updates.</span>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-2.5">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => setShowPopup(false)}
-                      className="flex-1 order-3 sm:order-1 bg-muted hover:bg-muted/80 text-foreground py-4 rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer text-center"
+                      className="px-3 py-2 bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
                     >
                       Later
                     </button>
-                    
                     <button
                       onClick={() => setShowInstructions(true)}
-                      className="flex-1 order-2 sm:order-2 bg-muted hover:bg-muted/80 text-primary border border-primary/20 py-4 rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer text-center"
+                      className="px-3 py-2 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
                     >
-                      Instructions
+                      Help
                     </button>
-                    
                     <button
                       onClick={installPWA}
-                      className="flex-1 order-1 sm:order-3 bg-primary text-brand-navy py-4 rounded-2xl text-xs font-black uppercase tracking-wider shadow-yellow hover:bg-primary-dim active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="flex-1 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 py-2 rounded-xl text-xs font-black shadow-md flex items-center justify-center gap-1.5 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
                     >
-                      <Download size={14} /> Install App
+                      <Download size={13} />
+                      <span>Install App</span>
                     </button>
                   </div>
                 </div>

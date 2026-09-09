@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Check,
@@ -13,7 +13,6 @@ import {
   Compass,
   FileSpreadsheet,
   Briefcase,
-  Sparkles,
   Receipt,
   Activity,
   FileText,
@@ -39,7 +38,7 @@ import { usePWA } from '../components/PWAProvider';
 export default function CproHubLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
-  const { setShowPopup, installPWA, isStandalone } = usePWA();
+  const { installPWA, isStandalone } = usePWA();
 
   return (
     <div className="min-h-screen bg-[#061224] text-white font-['Plus_Jakarta_Sans',sans-serif] selection:bg-[#FFC107] selection:text-black overflow-x-hidden">
@@ -169,48 +168,54 @@ export default function CproHubLanding() {
       </nav>
 
       {/* ─────────────────── HERO SECTION ─────────────────── */}
-      <section id="home" className="relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden">
-        {/* Background ambient lighting */}
-        <div className="absolute top-0 left-1/4 w-[600px] h-[500px] bg-sky-500/10 blur-[130px] rounded-full pointer-events-none" />
-        <div className="absolute top-40 right-10 w-[500px] h-[500px] bg-amber-500/10 blur-[140px] rounded-full pointer-events-none" />
+      <section id="home" className="relative pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-20 overflow-visible bg-[#061224]">
+        {/* Panoramic Background with Worker & Sunny Construction Site */}
+        <div 
+          className="absolute inset-0 bg-cover bg-no-repeat bg-[position:80%_top] sm:bg-[position:center_top] lg:bg-center"
+          style={{ backgroundImage: `url('/cprohub-hero-banner.jpg')` }}
+        />
+        {/* Deep dark navy gradient on left to guarantee crisp text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#061224] via-[#061224]/85 to-transparent lg:via-[#061224]/65" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#061224] via-transparent to-transparent lg:hidden" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            {/* Left Content (Col 1 - 5) */}
-            <div className="lg:col-span-5 text-left">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 items-center">
+            
+            {/* Left Column: Headlines, Copy, Badges, CTAs (Col 1 - 6) */}
+            <div className="lg:col-span-6 text-left pt-6 pb-2">
               <span className="inline-block text-[11px] sm:text-xs font-bold tracking-[0.2em] text-slate-300 uppercase mb-3">
                 THE ALL-IN-ONE CONSTRUCTION PLATFORM
               </span>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-black tracking-tight text-white leading-[1.15] mb-5">
+              <h1 className="text-3xl sm:text-4xl lg:text-[42px] xl:text-[45px] font-black tracking-tight text-white leading-[1.15] mb-5">
                 Everything You Need to{' '}
                 <span className="text-[#FFC107]">Build, Manage & Grow</span>{' '}
                 Your Construction Business.
               </h1>
 
-              <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6 font-normal">
+              <p className="text-slate-200 text-sm sm:text-base leading-relaxed mb-6 font-normal max-w-xl">
                 CPROHUB brings together all the essential tools you need — from finding opportunities and
                 managing your projects to handling your finances, workforce and more. All in one place.
               </p>
 
               {/* 3 Checkmark Badges */}
               <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-7 text-xs font-bold text-slate-200">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-slate-300">
+                <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-xs px-2.5 py-1 rounded-full border border-white/10">
+                  <span className="w-4 h-4 rounded-full bg-slate-700/80 flex items-center justify-center text-[#FFC107]">
                     <Check size={11} strokeWidth={3} />
                   </span>
                   <span>More Opportunities</span>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-slate-300">
+                <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-xs px-2.5 py-1 rounded-full border border-white/10">
+                  <span className="w-4 h-4 rounded-full bg-slate-700/80 flex items-center justify-center text-[#FFC107]">
                     <Check size={11} strokeWidth={3} />
                   </span>
                   <span>Less Paperwork</span>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-slate-300">
+                <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-xs px-2.5 py-1 rounded-full border border-white/10">
+                  <span className="w-4 h-4 rounded-full bg-slate-700/80 flex items-center justify-center text-[#FFC107]">
                     <Check size={11} strokeWidth={3} />
                   </span>
                   <span>Greater Efficiency</span>
@@ -221,7 +226,7 @@ export default function CproHubLanding() {
               <div className="flex flex-wrap items-center gap-4 mb-4">
                 <Link
                   to="/register"
-                  className="bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 font-extrabold text-sm px-7 py-3.5 rounded-full shadow-lg shadow-yellow-500/15 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  className="bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 font-black text-sm px-7 py-3.5 rounded-full shadow-lg shadow-yellow-500/20 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
                   <span>Get Started Free</span>
                   <ArrowRight size={16} strokeWidth={2.5} />
@@ -230,7 +235,7 @@ export default function CproHubLanding() {
                 <button
                   type="button"
                   onClick={() => setVideoModalOpen(true)}
-                  className="border border-white/40 hover:border-white text-white font-bold text-sm px-6 py-3.5 rounded-full flex items-center gap-2.5 hover:bg-white/10 transition-all cursor-pointer"
+                  className="border border-white/40 hover:border-white text-white font-bold text-sm px-6 py-3.5 rounded-full flex items-center gap-2.5 hover:bg-white/10 transition-all cursor-pointer bg-black/20 backdrop-blur-xs"
                 >
                   <span className="w-5 h-5 rounded-full border border-white/60 flex items-center justify-center">
                     <Play size={10} className="fill-white translate-x-[0.5px]" />
@@ -239,185 +244,172 @@ export default function CproHubLanding() {
                 </button>
               </div>
 
-              <p className="text-[11px] sm:text-xs text-slate-400 font-medium">
+              <p className="text-[11px] sm:text-xs text-slate-300 font-medium">
                 The core services are 100% free. The only cost is a marketplace commission when you make a sale.
               </p>
             </div>
 
-            {/* Center Worker Image (Col 6 - 8) */}
-            <div className="lg:col-span-4 flex justify-center relative">
-              <div className="relative w-full max-w-[340px] sm:max-w-[400px]">
-                {/* Glow ring behind worker */}
-                <div className="absolute inset-0 rounded-3xl bg-radial from-amber-400/20 to-transparent blur-2xl" />
+            {/* Middle Spacer Column for the Engineer who is in the background image (Col 7 - 8) */}
+            <div className="hidden lg:block lg:col-span-2 min-h-[340px]" />
 
-                <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-white/10">
-                  <img
-                    src="/hero-worker.jpg"
-                    alt="African Construction Engineer with Smartphone"
-                    className="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-700"
-                  />
-                  {/* Subtle gradient vignette at bottom to blend into section */}
-                  <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#061224] via-[#061224]/50 to-transparent" />
-                </div>
-              </div>
-            </div>
-
-            {/* Right Mobile Phone Mockup (Col 9 - 12) */}
-            <div className="lg:col-span-3 flex justify-center lg:justify-end">
+            {/* Right Column: Floating Light-Themed Mobile Phone Mockup (Col 9 - 12) */}
+            <div className="lg:col-span-4 flex justify-center lg:justify-end z-20 relative lg:translate-y-12 xl:translate-y-16 lg:-mb-24 xl:-mb-32">
               {/* Phone Chassis */}
-              <div className="relative w-[280px] sm:w-[290px] rounded-[42px] p-2.5 bg-gradient-to-b from-slate-700 via-slate-900 to-black shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_30px_rgba(255,193,7,0.15)] border border-slate-700/60">
-                {/* Screen glass */}
-                <div className="bg-[#0A1628] rounded-[34px] overflow-hidden border border-slate-800 text-white flex flex-col select-none">
+              <div className="relative w-[280px] sm:w-[295px] rounded-[44px] p-2.5 bg-slate-900/90 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_10px_30px_rgba(0,0,0,0.4)] border border-slate-700/80 backdrop-blur-md transition-transform hover:-translate-y-1 duration-300">
+                {/* Screen glass (Light UI theme matching reference design) */}
+                <div className="bg-[#F8FAFC] rounded-[36px] overflow-hidden border border-slate-200 text-slate-900 flex flex-col select-none shadow-inner">
+                  
                   {/* Status Bar */}
-                  <div className="px-6 pt-3 pb-1 flex items-center justify-between text-[11px] font-semibold text-slate-300">
+                  <div className="px-6 pt-3 pb-1 flex items-center justify-between text-[11px] font-bold text-slate-900">
                     <span>9:41</span>
-                    {/* Dynamic Island / speaker notch */}
+                    {/* Dynamic Island pill */}
                     <div className="w-16 h-3.5 bg-black rounded-full mx-auto" />
-                    <div className="flex items-center gap-1.5 text-slate-200">
-                      <Wifi size={12} />
-                      <Battery size={13} className="fill-slate-200" />
+                    <div className="flex items-center gap-1.5 text-slate-900">
+                      <Wifi size={12} strokeWidth={2.5} />
+                      <Battery size={13} className="fill-slate-900" />
                     </div>
                   </div>
 
                   {/* App Header */}
-                  <div className="px-4 py-2.5 flex items-center justify-between border-b border-slate-800/60">
+                  <div className="px-4 py-2 flex items-center justify-between border-b border-slate-100 bg-white">
                     <div className="flex items-center gap-1.5">
-                      <div className="flex items-end gap-0.5 h-4">
+                      <div className="flex items-end gap-0.5 h-3.5">
                         <span className="w-1 h-2 bg-[#FFC107] rounded-xs" />
-                        <span className="w-1 h-3 bg-[#FFC107] rounded-xs" />
-                        <span className="w-1 h-4 bg-[#FFC107] rounded-xs" />
+                        <span className="w-1 h-2.5 bg-[#FFC107] rounded-xs" />
+                        <span className="w-1 h-3.5 bg-[#FFC107] rounded-xs" />
                       </div>
-                      <span className="text-xs font-black tracking-wider text-white">CPROHUB</span>
+                      <span className="text-xs font-black tracking-wider text-slate-950">CPROHUB</span>
                     </div>
 
-                    <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300">
+                    <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-700">
                       <User size={12} />
                     </div>
                   </div>
 
                   {/* Greeting */}
-                  <div className="px-4 pt-3 pb-2 text-left">
-                    <p className="text-[10px] text-slate-400 font-medium">Good morning,</p>
-                    <p className="text-xs font-extrabold text-white">John Construction Ltd</p>
+                  <div className="px-4 pt-2.5 pb-1.5 text-left bg-white">
+                    <p className="text-[10px] text-slate-500 font-semibold">Good morning,</p>
+                    <p className="text-xs font-extrabold text-slate-900">John Construction Ltd</p>
                   </div>
 
                   {/* Promo Yellow Card */}
-                  <div className="mx-4 mb-3 p-2.5 rounded-xl bg-gradient-to-r from-[#FDE047] to-[#FACC15] text-slate-950 flex items-center justify-between shadow-sm">
+                  <div className="mx-3.5 my-2 p-2.5 rounded-xl bg-gradient-to-r from-[#FFC107] to-[#F59E0B] text-slate-950 flex items-center justify-between shadow-xs">
                     <div className="text-left pr-2">
-                      <p className="text-[10px] font-extrabold leading-tight">Everything you need in one place</p>
+                      <p className="text-[10.5px] font-black leading-tight">Everything you need<br />in one place</p>
                     </div>
-                    <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-black/10 bg-amber-200">
+                    <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-black/15 bg-amber-100 shadow-xs">
                       <img
                         src="/hero-worker.jpg"
-                        alt="Avatar"
+                        alt="Engineer"
                         className="w-full h-full object-cover"
                       />
                     </div>
                   </div>
 
-                  {/* 3x3 App Icon Grid */}
-                  <div className="px-3 pb-3 grid grid-cols-3 gap-2">
+                  {/* 3x3 App Icon Grid (Clean White Cards with Soft Tinted Icons) */}
+                  <div className="px-3 py-1.5 grid grid-cols-3 gap-2 bg-[#F8FAFC]">
                     {/* 1. Directory */}
-                    <div className="flex flex-col items-center gap-1 p-1.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/30 transition-colors">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-white border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                      <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                         <Building2 size={13} />
                       </div>
-                      <span className="text-[8.5px] font-bold text-slate-300">Directory</span>
+                      <span className="text-[8.5px] font-bold text-slate-700">Directory</span>
                     </div>
 
                     {/* 2. Marketplace */}
-                    <div className="flex flex-col items-center gap-1 p-1.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/30 transition-colors">
-                      <div className="w-7 h-7 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-white border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                      <div className="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
                         <ShoppingCart size={13} />
                       </div>
-                      <span className="text-[8.5px] font-bold text-slate-300">Marketplace</span>
+                      <span className="text-[8.5px] font-bold text-slate-700">Marketplace</span>
                     </div>
 
                     {/* 3. Opportunities */}
-                    <div className="flex flex-col items-center gap-1 p-1.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/30 transition-colors">
-                      <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-white border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                      <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
                         <Briefcase size={13} />
                       </div>
-                      <span className="text-[8.5px] font-bold text-slate-300">Opportunities</span>
+                      <span className="text-[8.5px] font-bold text-slate-700">Opportunities</span>
                     </div>
 
                     {/* 4. BOQ Tool */}
-                    <div className="flex flex-col items-center gap-1 p-1.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/30 transition-colors">
-                      <div className="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-white border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                      <div className="w-7 h-7 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center">
                         <Calculator size={13} />
                       </div>
-                      <span className="text-[8.5px] font-bold text-slate-300">BOQ Tool</span>
+                      <span className="text-[8.5px] font-bold text-slate-700">BOQ Tool</span>
                     </div>
 
                     {/* 5. Projects */}
-                    <div className="flex flex-col items-center gap-1 p-1.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/30 transition-colors">
-                      <div className="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-white border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                      <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
                         <FolderKanban size={13} />
                       </div>
-                      <span className="text-[8.5px] font-bold text-slate-300">Projects</span>
+                      <span className="text-[8.5px] font-bold text-slate-700">Projects</span>
                     </div>
 
                     {/* 6. Invoices */}
-                    <div className="flex flex-col items-center gap-1 p-1.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/30 transition-colors">
-                      <div className="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-white border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                      <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
                         <FileText size={13} />
                       </div>
-                      <span className="text-[8.5px] font-bold text-slate-300">Invoices</span>
+                      <span className="text-[8.5px] font-bold text-slate-700">Invoices</span>
                     </div>
 
                     {/* 7. AI Hub */}
-                    <div className="flex flex-col items-center gap-1 p-1.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/30 transition-colors">
-                      <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-white border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                      <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                         <BrainCircuit size={13} />
                       </div>
-                      <span className="text-[8.5px] font-bold text-slate-300">AI Hub</span>
+                      <span className="text-[8.5px] font-bold text-slate-700">AI Hub</span>
                     </div>
 
                     {/* 8. Analytics */}
-                    <div className="flex flex-col items-center gap-1 p-1.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/30 transition-colors">
-                      <div className="w-7 h-7 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-white border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                      <div className="w-7 h-7 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
                         <BarChart3 size={13} />
                       </div>
-                      <span className="text-[8.5px] font-bold text-slate-300">Analytics</span>
+                      <span className="text-[8.5px] font-bold text-slate-700">Analytics</span>
                     </div>
 
                     {/* 9. More */}
-                    <div className="flex flex-col items-center gap-1 p-1.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/30 transition-colors">
-                      <div className="w-7 h-7 rounded-lg bg-slate-500/20 text-slate-400 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-white border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                      <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
                         <Grid size={13} />
                       </div>
-                      <span className="text-[8.5px] font-bold text-slate-300">More</span>
+                      <span className="text-[8.5px] font-bold text-slate-700">More</span>
                     </div>
                   </div>
 
                   {/* App Bottom Nav */}
-                  <div className="px-4 py-2 bg-slate-900/90 border-t border-slate-800/80 grid grid-cols-4 gap-1 text-[8px] font-bold">
+                  <div className="px-4 py-2.5 bg-white border-t border-slate-200 grid grid-cols-4 gap-1 text-[8px] font-bold text-slate-500">
                     <div className="flex flex-col items-center text-[#FFC107]">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#FFC107] mb-0.5" />
-                      <span>Home</span>
+                      <span className="font-extrabold text-slate-900">Home</span>
                     </div>
-                    <div className="flex flex-col items-center text-slate-400">
-                      <MessageSquare size={10} className="mb-0.5" />
+                    <div className="flex flex-col items-center hover:text-slate-800">
+                      <MessageSquare size={11} className="mb-0.5" />
                       <span>Messages</span>
                     </div>
-                    <div className="flex flex-col items-center text-slate-400">
-                      <Bell size={10} className="mb-0.5" />
+                    <div className="flex flex-col items-center hover:text-slate-800">
+                      <Bell size={11} className="mb-0.5" />
                       <span>Alerts</span>
                     </div>
-                    <div className="flex flex-col items-center text-slate-400">
-                      <User size={10} className="mb-0.5" />
+                    <div className="flex flex-col items-center hover:text-slate-800">
+                      <User size={11} className="mb-0.5" />
                       <span>Profile</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
       {/* ─────────────────── SECTION 2: WHY CPROHUB? ─────────────────── */}
-      <section id="why" className="bg-white text-slate-900 py-20 lg:py-28 relative">
+      <section id="why" className="bg-white text-slate-900 pt-20 pb-20 lg:pt-28 lg:pb-28 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             {/* Left Column (Col 1 - 6) */}

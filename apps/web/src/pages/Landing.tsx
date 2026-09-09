@@ -1,5 +1,5 @@
 /** @jsx React.createElement */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Calculator, Search, MapPin, ShieldCheck, Award, Tag, Smile,
@@ -11,7 +11,7 @@ import { usePWA } from '../components/PWAProvider';
 
 export default function Landing() {
   const navigate = useNavigate();
-  const { setShowPopup, installPWA, isStandalone } = usePWA();
+  const { installPWA, isStandalone } = usePWA();
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
