@@ -168,7 +168,7 @@ export default function CproHubLanding() {
       </nav>
 
       {/* ─────────────────── HERO SECTION ─────────────────── */}
-      <section id="home" className="relative pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-20 overflow-visible bg-[#061224]">
+      <section id="home" className="relative pt-20 pb-8 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-20 overflow-visible bg-[#061224]">
         {/* Panoramic Background with Worker & Sunny Construction Site */}
         <div 
           className="absolute inset-0 bg-cover bg-no-repeat bg-center sm:bg-[position:center_top] lg:bg-center pointer-events-none"
@@ -180,72 +180,73 @@ export default function CproHubLanding() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#061224]/90 via-[#061224]/20 to-[#061224] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-6 items-center">
             
             {/* Left Column: Headlines, Copy, Badges, CTAs (Col 1 - 6) */}
-            <div className="lg:col-span-6 text-left pt-6 pb-2">
-              <span className="inline-block text-[11px] sm:text-xs font-bold tracking-[0.2em] text-slate-300 uppercase mb-3">
+            <div className="lg:col-span-6 text-center lg:text-left pt-2 sm:pt-6 pb-2 flex flex-col items-center lg:items-start">
+              <span className="inline-block text-[10px] sm:text-xs font-bold tracking-[0.18em] text-slate-300 uppercase mb-2 sm:mb-3">
                 THE ALL-IN-ONE CONSTRUCTION PLATFORM
               </span>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-[42px] xl:text-[45px] font-black tracking-tight text-white leading-[1.15] mb-5">
+              <h1 className="text-[25px] xs:text-[28px] sm:text-4xl lg:text-[42px] xl:text-[45px] font-black tracking-tight text-white leading-[1.16] mb-3 sm:mb-5 max-w-xl">
                 Everything You Need to{' '}
                 <span className="text-[#FFC107]">Build, Manage & Grow</span>{' '}
                 Your Construction Business.
               </h1>
 
-              <p className="text-slate-200 text-sm sm:text-base leading-relaxed mb-6 font-normal max-w-xl">
+              <p className="text-slate-200 text-xs sm:text-base leading-relaxed mb-4 sm:mb-6 font-normal max-w-xl mx-auto lg:mx-0">
                 CPROHUB brings together all the essential tools you need — from finding opportunities and
                 managing your projects to handling your finances, workforce and more. All in one place.
               </p>
 
-              {/* 3 Checkmark Badges */}
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-7 text-xs font-bold text-slate-200">
-                <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-xs px-2.5 py-1 rounded-full border border-white/10">
-                  <span className="w-4 h-4 rounded-full bg-slate-700/80 flex items-center justify-center text-[#FFC107]">
-                    <Check size={11} strokeWidth={3} />
+              {/* 3 Checkmark Badges (Positioned cleanly on one line / row) */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-1.5 sm:gap-3 mb-4 sm:mb-7 text-[10px] sm:text-xs font-bold text-slate-200">
+                <div className="flex items-center gap-1 bg-black/35 backdrop-blur-xs px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-white/10 shrink-0">
+                  <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-slate-700/80 flex items-center justify-center text-[#FFC107] shrink-0">
+                    <Check size={9} strokeWidth={3} />
                   </span>
                   <span>More Opportunities</span>
                 </div>
 
-                <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-xs px-2.5 py-1 rounded-full border border-white/10">
-                  <span className="w-4 h-4 rounded-full bg-slate-700/80 flex items-center justify-center text-[#FFC107]">
-                    <Check size={11} strokeWidth={3} />
+                <div className="flex items-center gap-1 bg-black/35 backdrop-blur-xs px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-white/10 shrink-0">
+                  <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-slate-700/80 flex items-center justify-center text-[#FFC107] shrink-0">
+                    <Check size={9} strokeWidth={3} />
                   </span>
                   <span>Less Paperwork</span>
                 </div>
 
-                <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-xs px-2.5 py-1 rounded-full border border-white/10">
-                  <span className="w-4 h-4 rounded-full bg-slate-700/80 flex items-center justify-center text-[#FFC107]">
-                    <Check size={11} strokeWidth={3} />
+                <div className="flex items-center gap-1 bg-black/35 backdrop-blur-xs px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-white/10 shrink-0">
+                  <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-slate-700/80 flex items-center justify-center text-[#FFC107] shrink-0">
+                    <Check size={9} strokeWidth={3} />
                   </span>
                   <span>Greater Efficiency</span>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-4 mb-4">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 sm:gap-4 mb-3 sm:mb-4">
                 <Link
                   to="/register"
-                  className="bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 font-black text-sm px-7 py-3.5 rounded-full shadow-lg shadow-yellow-500/20 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  className="bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 font-black text-xs sm:text-sm px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-full shadow-lg shadow-yellow-500/20 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
                   <span>Get Started Free</span>
-                  <ArrowRight size={16} strokeWidth={2.5} />
+                  <ArrowRight size={14} className="sm:w-4 sm:h-4" strokeWidth={2.5} />
                 </Link>
 
                 <button
                   type="button"
                   onClick={() => setVideoModalOpen(true)}
-                  className="border border-white/40 hover:border-white text-white font-bold text-sm px-6 py-3.5 rounded-full flex items-center gap-2.5 hover:bg-white/10 transition-all cursor-pointer bg-black/20 backdrop-blur-xs"
+                  className="border border-white/40 hover:border-white text-white font-bold text-xs sm:text-sm px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-full flex items-center gap-2 hover:bg-white/10 transition-all cursor-pointer bg-black/20 backdrop-blur-xs"
                 >
-                  <span className="w-5 h-5 rounded-full border border-white/60 flex items-center justify-center">
-                    <Play size={10} className="fill-white translate-x-[0.5px]" />
+                  <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-white/60 flex items-center justify-center">
+                    <Play size={8} className="fill-white translate-x-[0.5px] sm:hidden" />
+                    <Play size={10} className="fill-white translate-x-[0.5px] hidden sm:inline" />
                   </span>
                   <span>Watch Video</span>
                 </button>
               </div>
 
-              <p className="text-[11px] sm:text-xs text-slate-300 font-medium">
+              <p className="text-[10px] sm:text-xs text-slate-300 font-medium text-center lg:text-left max-w-md mx-auto lg:mx-0">
                 The core services are 100% free. The only cost is a marketplace commission when you make a sale.
               </p>
             </div>
@@ -254,11 +255,11 @@ export default function CproHubLanding() {
             <div className="hidden lg:block lg:col-span-2 min-h-[340px]" />
 
             {/* Right Column: Floating Light-Themed Mobile Phone Mockup (Col 9 - 12) */}
-            <div className="lg:col-span-4 flex justify-center lg:justify-end z-20 relative lg:translate-y-12 xl:translate-y-16 lg:-mb-24 xl:-mb-32">
+            <div className="lg:col-span-4 flex justify-center lg:justify-end z-20 relative mt-3 lg:mt-0 lg:translate-y-12 xl:translate-y-16 lg:-mb-24 xl:-mb-32">
               {/* Phone Chassis */}
-              <div className="relative w-[280px] sm:w-[295px] rounded-[44px] p-2.5 bg-slate-900/90 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_10px_30px_rgba(0,0,0,0.4)] border border-slate-700/80 backdrop-blur-md transition-transform hover:-translate-y-1 duration-300">
+              <div className="relative w-[260px] sm:w-[295px] rounded-[38px] sm:rounded-[44px] p-2 sm:p-2.5 bg-slate-900/90 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),0_10px_30px_rgba(0,0,0,0.4)] border border-slate-700/80 backdrop-blur-md transition-transform hover:-translate-y-1 duration-300">
                 {/* Screen glass (Light UI theme matching reference design) */}
-                <div className="bg-[#F8FAFC] rounded-[36px] overflow-hidden border border-slate-200 text-slate-900 flex flex-col select-none shadow-inner">
+                <div className="bg-[#F8FAFC] rounded-[30px] sm:rounded-[36px] overflow-hidden border border-slate-200 text-slate-900 flex flex-col select-none shadow-inner">
                   
                   {/* Status Bar */}
                   <div className="px-6 pt-3 pb-1 flex items-center justify-between text-[11px] font-bold text-slate-900">
