@@ -1,7 +1,7 @@
 import express from 'express';
 // 1. Import your named exports from the controller
 import { register, login, getSummary, getCompanyBySlug, getMyCompanyProfile, updateCompanyBySlug,
-updateCompanyPortfolio, updateCompanyLogo, deleteCompanyPortfolioImage, updateMyCompanyProfile, forgotPassword, resetPassword, updateCompanyLetterhead, upgradeSubscription } from '../controllers/authController';
+updateCompanyPortfolio, updateCompanyLogo, deleteCompanyPortfolioImage, updateMyCompanyProfile, forgotPassword, resetPassword, updateCompanyLetterhead, upgradeSubscription, getSubscriptionConfig } from '../controllers/authController';
 import { protect } from '../middleware/auth';
 import { authRateLimiter } from '../middleware/authRateLimit';
 import { upload } from '../middleware/upload';
@@ -50,6 +50,7 @@ router.get('/company/summary', protect, getSummary);
  */
 router.get('/company/profile', protect, getMyCompanyProfile);
 router.put('/company/profile', protect, updateMyCompanyProfile);
+router.get('/company/subscription-config', getSubscriptionConfig);
 router.post('/company/subscribe', protect, upgradeSubscription);
 router.get('/company/:slug', protect, getCompanyBySlug);
 router.put('/company/:slug', protect, updateCompanyBySlug);

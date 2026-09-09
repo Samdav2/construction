@@ -43,6 +43,16 @@ export interface ICompany extends Document {
     transactionId?: string;
     date: Date;
   }>;
+
+  subscriptionPayment?: {
+    plan?: string;
+    amount?: number;
+    paymentMethod?: string;
+    paymentReference?: string;
+    status?: 'active' | 'pending' | 'expired';
+    paidAt?: Date;
+    notes?: string;
+  };
 }
 
 const CompanySchema = new Schema({
@@ -91,6 +101,15 @@ const CompanySchema = new Schema({
     transactionId: String,
     date: { type: Date, default: Date.now },
   }],
+  subscriptionPayment: {
+    plan: { type: String, default: 'basic' },
+    amount: { type: Number, default: 0 },
+    paymentMethod: { type: String, default: 'manual_transfer' },
+    paymentReference: { type: String, default: '' },
+    status: { type: String, enum: ['active', 'pending', 'expired'], default: 'active' },
+    paidAt: { type: Date, default: Date.now },
+    notes: { type: String, default: '' },
+  },
 }, { timestamps: true });
 
 CompanySchema.pre('save', async function () {

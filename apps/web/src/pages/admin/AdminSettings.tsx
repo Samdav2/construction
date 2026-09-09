@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DashboardShell } from '../../components/layout/DashboardShell';
 import apiClient from '../../api/client';
-import { Zap, DollarSign, Bell, Save, Loader2, ShieldCheck, Cpu } from 'lucide-react';
+import { Zap, DollarSign, Bell, Save, Loader2, ShieldCheck, Cpu, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const AdminSettings = () => {
@@ -13,7 +13,15 @@ const AdminSettings = () => {
     marketplaceCommission: 2.5,
     tenderFee: 50,
     aiSystemPrompt: '',
-    maintenanceMode: false
+    maintenanceMode: false,
+    premiumMonthlyFee: 29,
+    premiumPaymentMethod: 'manual_transfer',
+    premiumPaymentInstructions: '',
+    premiumBankName: '',
+    premiumAccountNumber: '',
+    premiumAccountName: '',
+    premiumMobileMoneyNumber: '',
+    premiumSupportContact: ''
   });
 
   // 2. FETCH REAL GLOBAL CONFIG
@@ -32,7 +40,15 @@ const AdminSettings = () => {
         marketplaceCommission: config.marketplaceCommission || 2.5,
         tenderFee: config.tenderFee || 50,
         aiSystemPrompt: config.aiSystemPrompt || '',
-        maintenanceMode: config.maintenanceMode || false
+        maintenanceMode: config.maintenanceMode || false,
+        premiumMonthlyFee: config.premiumMonthlyFee ?? 29,
+        premiumPaymentMethod: config.premiumPaymentMethod || 'manual_transfer',
+        premiumPaymentInstructions: config.premiumPaymentInstructions || 'Transfer the monthly fee to our verified account details below, then enter your transaction reference number to activate Premium.',
+        premiumBankName: config.premiumBankName || 'United Bank for Africa (UBA)',
+        premiumAccountNumber: config.premiumAccountNumber || '1029384756',
+        premiumAccountName: config.premiumAccountName || 'CPROHUB Enterprise Ltd',
+        premiumMobileMoneyNumber: config.premiumMobileMoneyNumber || '+237 670 000 000',
+        premiumSupportContact: config.premiumSupportContact || 'billing@cprohub.com'
       });
     }
   }, [config]);
@@ -60,7 +76,7 @@ const AdminSettings = () => {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
           <div>
             <h1 className="text-4xl font-black text-foreground tracking-tight">Global Configuration</h1>
-            <p className="text-sm text-muted-foreground font-medium italic underline underline-offset-4 decoration-blue-600/20">Master controls for Cpromark Africa Infrastructure.</p>
+            <p className="text-sm text-muted-foreground font-medium italic underline underline-offset-4 decoration-blue-600/20">Master controls for CPROHUB Africa Infrastructure.</p>
           </div>
           <button 
             onClick={() => saveMutation.mutate(settings)}
@@ -105,6 +121,98 @@ const AdminSettings = () => {
                     className="w-full p-5 bg-muted border-none rounded-2xl text-sm font-black text-foreground outline-none focus:ring-4 ring-emerald-50 transition-all" 
                   />
                </div>
+            </div>
+          </div>
+
+          {/* SECTION 2: PREMIUM SUBSCRIPTION & PAYMENT SETUP */}
+          <div className="bg-card border border-border p-10 rounded-[3.5rem] shadow-sm relative overflow-hidden">
+            <div className="flex items-center gap-5 mb-10">
+               <div className="w-14 h-14 bg-[#FFC107]/15 rounded-2xl flex items-center justify-center text-[#FFC107] shadow-sm">
+                  <Sparkles size={28} />
+               </div>
+               <div>
+                  <h3 className="text-xl font-black text-foreground">Premium Subscription & Payment Setup</h3>
+                  <p className="text-xs text-muted-foreground font-medium">Set subscription fees and user payment instructions for upgrading to Premium.</p>
+               </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-2">Monthly Subscription Fee ($ USD)</label>
+                  <input 
+                    type="number" 
+                    value={settings.premiumMonthlyFee}
+                    onChange={(e) => setSettings({...settings, premiumMonthlyFee: parseFloat(e.target.value) || 0})}
+                    className="w-full p-5 bg-muted border-none rounded-2xl text-sm font-black text-foreground outline-none focus:ring-4 ring-amber-50 transition-all" 
+                    placeholder="29"
+                  />
+               </div>
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-2">Payment Recipient Bank Name</label>
+                  <input 
+                    type="text" 
+                    value={settings.premiumBankName}
+                    onChange={(e) => setSettings({...settings, premiumBankName: e.target.value})}
+                    className="w-full p-5 bg-muted border-none rounded-2xl text-sm font-bold text-foreground outline-none focus:ring-4 ring-amber-50 transition-all" 
+                    placeholder="e.g. United Bank for Africa (UBA)"
+                  />
+               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-2">Bank Account Number / IBAN</label>
+                  <input 
+                    type="text" 
+                    value={settings.premiumAccountNumber}
+                    onChange={(e) => setSettings({...settings, premiumAccountNumber: e.target.value})}
+                    className="w-full p-5 bg-muted border-none rounded-2xl text-sm font-bold text-foreground outline-none focus:ring-4 ring-amber-50 transition-all" 
+                    placeholder="e.g. 1029384756"
+                  />
+               </div>
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-2">Account Beneficiary Name</label>
+                  <input 
+                    type="text" 
+                    value={settings.premiumAccountName}
+                    onChange={(e) => setSettings({...settings, premiumAccountName: e.target.value})}
+                    className="w-full p-5 bg-muted border-none rounded-2xl text-sm font-bold text-foreground outline-none focus:ring-4 ring-amber-50 transition-all" 
+                    placeholder="e.g. CPROHUB Enterprise Ltd"
+                  />
+               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-2">Mobile Money / Orange / MTN Number</label>
+                  <input 
+                    type="text" 
+                    value={settings.premiumMobileMoneyNumber}
+                    onChange={(e) => setSettings({...settings, premiumMobileMoneyNumber: e.target.value})}
+                    className="w-full p-5 bg-muted border-none rounded-2xl text-sm font-bold text-foreground outline-none focus:ring-4 ring-amber-50 transition-all" 
+                    placeholder="e.g. +237 670 000 000"
+                  />
+               </div>
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-2">Billing Support Email / Contact</label>
+                  <input 
+                    type="text" 
+                    value={settings.premiumSupportContact}
+                    onChange={(e) => setSettings({...settings, premiumSupportContact: e.target.value})}
+                    className="w-full p-5 bg-muted border-none rounded-2xl text-sm font-bold text-foreground outline-none focus:ring-4 ring-amber-50 transition-all" 
+                    placeholder="e.g. billing@cprohub.com"
+                  />
+               </div>
+            </div>
+
+            <div className="space-y-3">
+               <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-2">User Payment Instructions / Narration Guide</label>
+               <textarea 
+                value={settings.premiumPaymentInstructions}
+                onChange={(e) => setSettings({...settings, premiumPaymentInstructions: e.target.value})}
+                className="w-full p-5 bg-muted border-none rounded-2xl text-xs font-medium text-foreground h-24 outline-none focus:ring-4 ring-amber-50 transition-all resize-none" 
+                placeholder="Instructions displayed to users when they initiate Premium upgrade..."
+               />
             </div>
           </div>
 

@@ -12,6 +12,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Service from '../models/Service';
 import Order from '../models/Order';
+import Settings from '../models/Settings';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // @desc    Register + Auto-generate Slug
@@ -429,6 +430,28 @@ export const resetPassword = async (req: Request, res: Response) => {
   }
 };
 
+// @desc    Get public/workspace subscription settings configured by admin
+export const getSubscriptionConfig = async (req: Request, res: Response) => {
+  try {
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = await Settings.create({});
+    }
+    res.status(200).json({
+      monthlyFee: settings.premiumMonthlyFee ?? 29,
+      paymentMethod: settings.premiumPaymentMethod ?? 'manual_transfer',
+      instructions: settings.premiumPaymentInstructions ?? 'Transfer the subscription fee to our verified account below and enter your payment reference to activate your Premium access.',
+      bankName: settings.premiumBankName ?? 'United Bank for Africa (UBA)',
+      accountNumber: settings.premiumAccountNumber ?? '1029384756',
+      accountName: settings.premiumAccountName ?? 'CPROHUB Enterprise Ltd',
+      mobileMoneyNumber: settings.premiumMobileMoneyNumber ?? '+237 670 000 000',
+      supportContact: settings.premiumSupportContact ?? 'billing@cprohub.com',
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch subscription config." });
+  }
+};
+
 // @desc    Upgrade company subscription to Premium
 export const upgradeSubscription = async (req: any, res: Response) => {
   try {
@@ -438,11 +461,26 @@ export const upgradeSubscription = async (req: any, res: Response) => {
     const company = await Company.findById(user.company);
     if (!company) return res.status(404).json({ message: "Company not found." });
 
+    const { paymentReference, paymentMethod, notes } = req.body;
+
+    let settings = await Settings.findOne();
+    const fee = settings?.premiumMonthlyFee || 29;
+
     company.plan = 'pro';
+    company.subscriptionPayment = {
+      plan: 'pro',
+      amount: fee,
+      paymentMethod: paymentMethod || settings?.premiumPaymentMethod || 'manual_transfer',
+      paymentReference: paymentReference ? String(paymentReference).trim() : `CPH-SUB-${Date.now().toString(36).toUpperCase()}`,
+      status: 'active',
+      paidAt: new Date(),
+      notes: notes ? String(notes).trim() : ''
+    };
+
     await company.save();
 
     res.status(200).json({
-      message: "Subscription upgraded to Premium.",
+      message: "Payment confirmed! Workspace successfully upgraded to CPROHUB Premium.",
       company
     });
   } catch (error) {

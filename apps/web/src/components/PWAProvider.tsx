@@ -97,11 +97,22 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [isStandalone, pendingPrompt]);
 
-  // Handle automatic popup on login
+  // Handle automatic popup on login & landing pages
   useEffect(() => {
     if (isStandalone) {
       sessionStorage.removeItem('justLoggedIn');
       return;
+    }
+
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    const isLandingPage = pathname === '/' || pathname === '/cprohub';
+    const hasDismissed = sessionStorage.getItem('pwa_prompt_dismissed') === 'true';
+
+    if (isLandingPage && !hasDismissed) {
+      const timer = setTimeout(() => {
+        setShowPopup(true);
+      }, 1200);
+      return () => clearTimeout(timer);
     }
 
     const checkLoginTrigger = () => {
@@ -146,10 +157,14 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const handleDismiss = () => {
+    setShowPopup(false);
+    sessionStorage.setItem('pwa_prompt_dismissed', 'true');
+  };
+
   const isInstallable = !isStandalone;
-  const isCproHub = typeof window !== 'undefined' && window.location.pathname.includes('cprohub');
-  const appName = isCproHub ? 'CproHub' : 'Cpromark';
-  const appLogo = isCproHub ? '/cprohub-logo.jpeg' : '/cpromark-logo.png';
+  const appName = 'CproHub';
+  const appLogo = '/cprohub-logo.jpeg';
 
   return (
     <PWAContext.Provider
@@ -164,27 +179,27 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
     >
       {children}
 
-      {/* Non-Blocking Top-Right Installation Popover */}
+      {/* Non-Blocking Bottom-Corner Installation Popover */}
       <AnimatePresence>
         {showPopup && (
           <div className="fixed inset-0 pointer-events-none z-[9999]">
             {/* Transparent click-outside dismisser (no dark background cover) */}
             <div
               className="absolute inset-0 pointer-events-auto"
-              onClick={() => setShowPopup(false)}
+              onClick={handleDismiss}
             />
 
             {/* Popover Form Card */}
             <motion.div
-              initial={{ opacity: 0, y: -15, scale: 0.95 }}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              exit={{ opacity: 0, y: 15, scale: 0.95 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="pointer-events-auto absolute top-16 sm:top-20 right-3 sm:right-6 w-[340px] max-w-[calc(100vw-1.5rem)] bg-[#0B182B]/98 text-white border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl rounded-2xl p-4 sm:p-5 z-10"
+              className="pointer-events-auto absolute bottom-5 sm:bottom-8 right-3 sm:right-8 w-[340px] max-w-[calc(100vw-1.5rem)] bg-[#0B182B]/98 text-white border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl rounded-2xl p-4 sm:p-5 z-10"
             >
               {/* Close 'X' Button */}
               <button
-                onClick={() => setShowPopup(false)}
+                onClick={handleDismiss}
                 className="absolute top-3.5 right-3.5 p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
                 aria-label="Close"
               >
@@ -223,7 +238,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
                     </div>
                   </div>
                   <button
-                    onClick={() => setShowPopup(false)}
+                    onClick={handleDismiss}
                     className="w-full bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 py-2.5 rounded-xl text-xs font-black shadow-md transition-all cursor-pointer text-center"
                   >
                     Got It
@@ -250,7 +265,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
                       Back
                     </button>
                     <button
-                      onClick={() => setShowPopup(false)}
+                      onClick={handleDismiss}
                       className="flex-1 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 py-2 rounded-xl text-xs font-black transition-all cursor-pointer"
                     >
                       Done
@@ -267,7 +282,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => setShowPopup(false)}
+                      onClick={handleDismiss}
                       className="px-3 py-2 bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
                     >
                       Later

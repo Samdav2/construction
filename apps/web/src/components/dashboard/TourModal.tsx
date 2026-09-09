@@ -7,7 +7,7 @@ import confetti from 'canvas-confetti';
 
 const TOUR_STEPS = [
   {
-    title: 'Welcome to Cpromark! 🎉',
+    title: 'Welcome to CPROHUB! 🎉',
     description: "You've successfully completed your workspace setup. Your public profile is live and you're ready to start receiving leads. Let's take a quick tour of your new command center.",
     icon: Flag,
     color: 'text-primary',
