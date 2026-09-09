@@ -1,7 +1,7 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useState, useMemo } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DashboardShell } from '../components/layout/DashboardShell';
 import { useAuthStore } from '../store/useAuthStore';
 import { useOnboardingStore } from '../store/useOnboardingStore';
@@ -10,6 +10,7 @@ import { TourModal } from '../components/dashboard/TourModal';
 import { PremiumBanner } from '../components/dashboard/PremiumBanner';
 import { PremiumModal } from '../components/dashboard/PremiumModal';
 import apiClient from '../api/client';
+import toast from 'react-hot-toast';
 import {
   Briefcase, ClipboardList, FileText, Users, Radar,
   BarChart, Sparkles, Store, Building2, Calculator, ArrowRight,
@@ -117,7 +118,28 @@ const Dashboard = () => {
   const { getHasSeenTour } = useOnboardingStore();
   const { format } = useCurrencyStore();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryClient = useQueryClient();
   const [premiumModalConfig, setPremiumModalConfig] = useState<{ open: boolean; title?: string; desc?: string }>({ open: false });
+
+  const premiumTx = searchParams.get('premium_tx');
+
+  // If redirected back with a Swychr transaction ID, verify it
+  useEffect(() => {
+    if (premiumTx) {
+      apiClient.get(`/auth/company/subscribe-verify/${premiumTx}`)
+        .then((res) => {
+          if (res.data?.status === 'success') {
+            toast.success('CPROHUB Premium activated successfully! 🚀');
+            queryClient.invalidateQueries({ queryKey: ['company-profile'] });
+            queryClient.invalidateQueries({ queryKey: ['analytics-overview'] });
+            searchParams.delete('premium_tx');
+            setSearchParams(searchParams, { replace: true });
+          }
+        })
+        .catch(() => {});
+    }
+  }, [premiumTx, queryClient, searchParams, setSearchParams]);
 
   // Prefetch overview data
   useQuery<Overview>({

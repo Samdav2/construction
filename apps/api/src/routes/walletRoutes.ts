@@ -241,39 +241,61 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req: a
     const txId: string = attributes?.transaction_id ?? '';
     const status = attributes?.status;
 
-    if (isPaymentSuccessful(status) && txId.startsWith('BH-WALLET-')) {
-      const parts = txId.split('-');
-      const companyId = parts[2];
-      const usdCents = Number(parts[3]);
-      const usdAmount = usdCents / 100;
+    if (isPaymentSuccessful(status)) {
+      if (txId.startsWith('BH-PREMIUM-')) {
+        const parts = txId.split('-');
+        const companyId = parts[2];
+        const usdCents = Number(parts[3]) || 2900;
+        const usdAmount = usdCents / 100;
 
-      const company = await Company.findById(companyId);
-      if (!company) return res.status(404).send('Company not found.');
+        const company = await Company.findById(companyId);
+        if (company) {
+          company.plan = 'pro';
+          company.subscriptionPayment = {
+            plan: 'pro',
+            amount: usdAmount,
+            paymentMethod: 'swychr',
+            paymentReference: txId,
+            status: 'active',
+            paidAt: new Date(),
+            notes: 'Swychr webhook verified'
+          };
+          await company.save();
+        }
+      } else if (txId.startsWith('BH-WALLET-')) {
+        const parts = txId.split('-');
+        const companyId = parts[2];
+        const usdCents = Number(parts[3]);
+        const usdAmount = usdCents / 100;
 
-      const alreadyCredited = (company.walletHistory ?? []).find((h: any) => h.transactionId === txId);
-      if (alreadyCredited) {
-        return res.status(200).send('Already processed');
+        const company = await Company.findById(companyId);
+        if (!company) return res.status(404).send('Company not found.');
+
+        const alreadyCredited = (company.walletHistory ?? []).find((h: any) => h.transactionId === txId);
+        if (alreadyCredited) {
+          return res.status(200).send('Already processed');
+        }
+
+        const { amount: localAmount, currency: localCurrency } = await convertToLocal(
+          company.countryCode ?? 'CM',
+          usdAmount
+        );
+
+        company.walletBalance = (company.walletBalance ?? 0) + usdAmount;
+        company.walletHistory = [
+          ...(company.walletHistory ?? []),
+          {
+            type: 'credit',
+            amount: localAmount,
+            amountUSD: usdAmount,
+            currency: localCurrency,
+            note: `Swychr top-up ($${usdAmount} USD)`,
+            transactionId: txId,
+            date: new Date(),
+          },
+        ];
+        await company.save();
       }
-
-      const { amount: localAmount, currency: localCurrency } = await convertToLocal(
-        company.countryCode ?? 'CM',
-        usdAmount
-      );
-
-      company.walletBalance = (company.walletBalance ?? 0) + usdAmount;
-      company.walletHistory = [
-        ...(company.walletHistory ?? []),
-        {
-          type: 'credit',
-          amount: localAmount,
-          amountUSD: usdAmount,
-          currency: localCurrency,
-          note: `Swychr top-up ($${usdAmount} USD)`,
-          transactionId: txId,
-          date: new Date(),
-        },
-      ];
-      await company.save();
     }
 
     res.status(200).send('OK');

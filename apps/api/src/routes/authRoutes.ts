@@ -1,7 +1,7 @@
 import express from 'express';
 // 1. Import your named exports from the controller
 import { register, login, getSummary, getCompanyBySlug, getMyCompanyProfile, updateCompanyBySlug,
-updateCompanyPortfolio, updateCompanyLogo, deleteCompanyPortfolioImage, updateMyCompanyProfile, forgotPassword, resetPassword, updateCompanyLetterhead, upgradeSubscription, getSubscriptionConfig } from '../controllers/authController';
+updateCompanyPortfolio, updateCompanyLogo, deleteCompanyPortfolioImage, updateMyCompanyProfile, forgotPassword, resetPassword, updateCompanyLetterhead, upgradeSubscription, getSubscriptionConfig, initiateSubscriptionPayment, subscribeCallback, verifySubscriptionPayment } from '../controllers/authController';
 import { protect } from '../middleware/auth';
 import { authRateLimiter } from '../middleware/authRateLimit';
 import { upload } from '../middleware/upload';
@@ -52,6 +52,9 @@ router.get('/company/profile', protect, getMyCompanyProfile);
 router.put('/company/profile', protect, updateMyCompanyProfile);
 router.get('/company/subscription-config', getSubscriptionConfig);
 router.post('/company/subscribe', protect, upgradeSubscription);
+router.post('/company/subscribe-initiate', protect, initiateSubscriptionPayment);
+router.get('/company/subscribe-callback', subscribeCallback);
+router.get('/company/subscribe-verify/:txId', protect, verifySubscriptionPayment);
 router.get('/company/:slug', protect, getCompanyBySlug);
 router.put('/company/:slug', protect, updateCompanyBySlug);
 router.post('/company/:slug/logo', protect, handleUpload(upload.single('file')), updateCompanyLogo);

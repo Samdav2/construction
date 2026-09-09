@@ -14,6 +14,18 @@ import Service from '../models/Service';
 import Order from '../models/Order';
 import Settings from '../models/Settings';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import {
+  createPaymentLink,
+  getPaymentLinkStatus,
+  convertToLocal,
+  isPaymentSuccessful
+} from '../services/swychrService';
+
+const COUNTRY_CURRENCY: Record<string, string> = {
+  CM: 'XAF', SN: 'XOF', CI: 'XOF', BJ: 'XOF', BF: 'XOF', ML: 'XOF',
+  NG: 'NGN', GH: 'GHS', KE: 'KES', ZA: 'ZAR', EG: 'EGP',
+  US: 'USD', GB: 'GBP',
+};
 
 // @desc    Register + Auto-generate Slug
 export const register = async (req: Request, res: Response) => {
@@ -485,5 +497,123 @@ export const upgradeSubscription = async (req: any, res: Response) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to upgrade subscription." });
+  }
+};
+
+// @desc    Initiate Swychr payment link for Premium subscription
+export const initiateSubscriptionPayment = async (req: any, res: Response) => {
+  try {
+    const user = await User.findById(req.user.id).populate('company');
+    if (!user) return res.status(404).json({ message: "User not found." });
+
+    const company = user.company as any;
+    if (!company) return res.status(404).json({ message: "Company not found." });
+
+    let settings = await Settings.findOne();
+    const fee = settings?.premiumMonthlyFee || 29;
+
+    const { countryCode: reqCountry } = req.body;
+    const countryCode = String(reqCountry || company.countryCode || 'CM').toUpperCase();
+    const currency = COUNTRY_CURRENCY[countryCode] || 'XAF';
+
+    let localAmount: number;
+    let localCurrency = currency;
+    try {
+      const conv = await convertToLocal(countryCode, fee);
+      localAmount = conv.amount;
+      localCurrency = conv.currency;
+    } catch {
+      const FALLBACK: Record<string, number> = {
+        XAF: 600, XOF: 600, NGN: 1600, GHS: 15, KES: 130, ZAR: 19, EGP: 48, USD: 1, EUR: 0.92, GBP: 0.79,
+      };
+      localAmount = Math.ceil(fee * (FALLBACK[currency] ?? 600));
+    }
+
+    const usdCents = Math.round(fee * 100);
+    const txId = `BH-PREMIUM-${company._id}-${usdCents}-${Date.now()}`;
+
+    const backendBase = (process.env.BACKEND_URL || '').replace(/\/api\/?$/, '');
+    const callbackUrl = `${backendBase}/api/v1/auth/company/subscribe-callback?transaction_id=${txId}`;
+
+    const paymentLink = await createPaymentLink({
+      country_code: countryCode,
+      currency: localCurrency,
+      amount: localAmount,
+      name: company.name || user.name,
+      email: user.email,
+      transaction_id: txId,
+      description: `CPROHUB Premium Subscription — ${company.name || user.name}`,
+      pass_digital_charge: true,
+      callback_url: callbackUrl,
+    });
+
+    res.json({
+      paymentLink,
+      transactionId: txId,
+      localAmount,
+      localCurrency,
+      amountUSD: fee,
+      countryCode,
+    });
+  } catch (error: any) {
+    console.error('[Subscription initiate error]', error.message);
+    res.status(500).json({ message: error.message || "Failed to initiate subscription payment." });
+  }
+};
+
+// @desc    Callback from Swychr payment redirect
+export const subscribeCallback = (req: any, res: Response) => {
+  const txId = req.query.transaction_id as string;
+  const frontendBase = process.env.FRONTEND_URL || 'http://localhost:5173';
+  return res.redirect(302, `${frontendBase}/dashboard?premium_tx=${txId || ''}`);
+};
+
+// @desc    Verify Swychr Premium subscription status
+export const verifySubscriptionPayment = async (req: any, res: Response) => {
+  try {
+    const { txId } = req.params;
+    if (!txId) return res.status(400).json({ message: 'Missing transaction ID.' });
+
+    const user = await User.findById(req.user.id).populate('company');
+    const company = user?.company as any;
+    if (!company) return res.status(404).json({ message: 'Company not found.' });
+
+    if (company.plan === 'pro' && company.subscriptionPayment?.paymentReference === txId) {
+      return res.json({ status: 'success', company, alreadyActive: true });
+    }
+
+    const statusData = await getPaymentLinkStatus(txId);
+    const attributes = statusData?.data?.data?.attributes || statusData?.data || statusData;
+    const status = attributes?.status;
+
+    if (!isPaymentSuccessful(status)) {
+      return res.json({ status: 'pending' });
+    }
+
+    const parts = txId.split('-');
+    const usdCents = Number(parts[3]) || 2900;
+    const usdAmount = usdCents / 100;
+
+    const updated = await Company.findByIdAndUpdate(
+      company._id,
+      {
+        plan: 'pro',
+        subscriptionPayment: {
+          plan: 'pro',
+          amount: usdAmount,
+          paymentMethod: 'swychr',
+          paymentReference: txId,
+          status: 'active',
+          paidAt: new Date(),
+          notes: 'Swychr checkout verified'
+        }
+      },
+      { new: true }
+    );
+
+    res.json({ status: 'success', company: updated });
+  } catch (error: any) {
+    console.error('[Subscription verify error]', error.message);
+    res.status(500).json({ message: error.message || 'Subscription verification failed.' });
   }
 };
