@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Plus, Upload, Loader2, CheckCircle2, Edit2, Trash2, Eye, EyeOff, LayoutGrid } from 'lucide-react';
+import { Plus, Upload, Loader2, CheckCircle2, Edit2, Trash2, Eye, EyeOff, LayoutGrid, Sparkles, Zap } from 'lucide-react';
 import apiClient from '../../api/client';
+import { PremiumModal } from '../dashboard/PremiumModal';
 
 export const MyProductsTab = () => {
   const queryClient = useQueryClient();
 
   const [viewMode, setViewMode] = useState<'list' | 'form'>('list');
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -29,6 +31,14 @@ export const MyProductsTab = () => {
     'Interlocking paving stones', 'Waterproofing materials', 'Solar products'
   ];
 
+  // Fetch Company Plan
+  const { data: company } = useQuery({
+    queryKey: ['company-profile'],
+    queryFn: async () => (await apiClient.get('/auth/company/profile')).data,
+  });
+
+  const isPremium = company?.plan === 'pro' || company?.plan === 'enterprise';
+
   // Fetch My Products
   const { data: myProducts = [], isLoading } = useQuery({
     queryKey: ['my-products'],
@@ -46,6 +56,10 @@ export const MyProductsTab = () => {
   };
 
   const handleCreateNew = () => {
+    if (!isPremium) {
+      setShowPremiumModal(true);
+      return;
+    }
     resetForm();
     setViewMode('form');
   };
@@ -147,7 +161,36 @@ export const MyProductsTab = () => {
              <Plus size={16} /> Upload New
            </button>
         </div>
+        {!isPremium && (
+          <button
+            onClick={() => setShowPremiumModal(true)}
+            className="flex items-center gap-2 bg-[#FFC107]/10 hover:bg-[#FFC107]/20 text-[#FFC107] border border-[#FFC107]/30 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all"
+          >
+            <Sparkles size={14} />
+            <span>Unlock Selling</span>
+          </button>
+        )}
       </div>
+
+      {!isPremium && (
+        <div className="max-w-4xl mx-auto mb-6 bg-[#071426] border border-white/15 rounded-3xl p-5 sm:p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-2xl bg-[#FFC107]/20 text-[#FFC107] flex items-center justify-center shrink-0">
+              <Zap size={20} className="fill-[#FFC107]" />
+            </div>
+            <div>
+              <h4 className="font-black text-base text-white">Marketplace Selling is a Premium Feature</h4>
+              <p className="text-xs text-slate-300 font-medium mt-0.5">Upgrade your account to list building materials, manage inventory, and receive contractor orders.</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowPremiumModal(true)}
+            className="w-full sm:w-auto px-5 py-2.5 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 rounded-xl text-xs font-black uppercase tracking-wider shadow-lg shadow-yellow-500/20 shrink-0 transition-all"
+          >
+            Upgrade Now
+          </button>
+        </div>
+      )}
 
       <div className="max-w-4xl mx-auto">
         
@@ -324,6 +367,13 @@ export const MyProductsTab = () => {
           </div>
         )}
       </div>
+      
+      <PremiumModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+        featureTitle="Marketplace Material Selling"
+        featureDesc="Upgrade to Premium to list and sell construction materials and equipment directly to active contractors."
+      />
     </div>
   );
 };

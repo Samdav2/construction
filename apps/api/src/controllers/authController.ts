@@ -19,6 +19,10 @@ export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password, companyName, city, country } = req.body;
 
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Name, email, and password are required." });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "Email already in use." });
 
@@ -26,8 +30,14 @@ export const register = async (req: Request, res: Response) => {
     const user = new User({ name, email, password: hashedPassword, role: 'owner' });
     await user.save();
 
+    const finalCompanyName = (companyName && companyName.trim()) ? companyName.trim() : `${name.trim()}'s Enterprise`;
     const company = new Company({
-      name: companyName, city, country, owner: user._id, status: 'pending'
+      name: finalCompanyName,
+      city: city || '',
+      country: country || '',
+      owner: user._id,
+      status: 'pending',
+      plan: 'basic'
     });
     await company.save();
 
@@ -41,9 +51,9 @@ export const register = async (req: Request, res: Response) => {
     );
 
     res.status(201).json({
-      message: "BuildHub Office Initialized",
+      message: "CproHub Account Initialized",
       token,
-      user: { id: user._id, name: user.name, role: user.role, companyId: company._id, slug: company.slug }
+      user: { id: user._id, name: user.name, role: user.role, companyId: company._id, company: company.name, slug: company.slug, plan: company.plan }
     });
   } catch (error) {
     res.status(500).json({ message: "Registration failed at infrastructure level." });
@@ -416,5 +426,26 @@ export const resetPassword = async (req: Request, res: Response) => {
     res.status(200).json({ message: 'Password reset successfully.' });
   } catch (error) {
     res.status(500).json({ message: 'Password reset failed.' });
+  }
+};
+
+// @desc    Upgrade company subscription to Premium
+export const upgradeSubscription = async (req: any, res: Response) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found." });
+
+    const company = await Company.findById(user.company);
+    if (!company) return res.status(404).json({ message: "Company not found." });
+
+    company.plan = 'pro';
+    await company.save();
+
+    res.status(200).json({
+      message: "Subscription upgraded to Premium.",
+      company
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to upgrade subscription." });
   }
 };

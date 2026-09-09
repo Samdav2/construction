@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DashboardShell } from '../components/layout/DashboardShell';
 import apiClient from '../api/client';
-import { User, MapPin, Loader2, Inbox, Eye, MousePointerClick, TrendingUp, Sparkles, ChevronDown, Mail, Phone, Store, Briefcase, Building2, AlertCircle, ArrowRight } from 'lucide-react';
+import { User, MapPin, Loader2, Inbox, Eye, MousePointerClick, TrendingUp, Sparkles, ChevronDown, Mail, Phone, Store, Briefcase, Building2, AlertCircle, ArrowRight, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { t, statusBadge } from '../theme';
+import { PremiumModal } from '../components/dashboard/PremiumModal';
 
 const DashboardCard = ({ icon: Icon, title, desc, path, delay, isPrimary, className }: any) => (
   <Link to={path} className={`group block relative overflow-hidden rounded-[2rem] border transition-all duration-300 hover:-translate-y-1 ${
@@ -49,6 +50,7 @@ const DirectoryLeads = () => {
   const navigate = useNavigate();
   const [expandedLead, setExpandedLead] = useState<string | null>(null);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const { data: leads, isLoading } = useQuery({
     queryKey: ['inquiries'],
@@ -76,6 +78,8 @@ const DirectoryLeads = () => {
     queryKey: ['company-profile'],
     queryFn: async () => (await apiClient.get('/auth/company/profile')).data,
   });
+
+  const isPremium = company?.plan === 'pro' || company?.plan === 'enterprise';
 
   useEffect(() => {
     if (!companyLoading && company) {
@@ -126,7 +130,38 @@ const DirectoryLeads = () => {
             <h1 className={t.h1 + ' text-3xl'}>Business Directory</h1>
             <p className={t.muted + ' italic mt-1'}>Client inquiries and public directory performance.</p>
           </div>
+          {!isPremium && (
+            <button
+              onClick={() => setShowPremiumModal(true)}
+              className="hidden sm:flex items-center gap-2 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-yellow-500/20 transition-all cursor-pointer"
+            >
+              <Zap size={14} className="fill-slate-950" />
+              <span>Upgrade to Premium</span>
+            </button>
+          )}
         </header>
+
+        {!isPremium && (
+          <div className="mb-10 bg-[#071426] border border-white/15 rounded-3xl p-6 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#FFC107]/20 text-[#FFC107] flex items-center justify-center shrink-0">
+                <Zap size={24} className="fill-[#FFC107]" />
+              </div>
+              <div>
+                <h4 className="font-black text-lg text-white">Public Directory Listing is a Premium Feature</h4>
+                <p className="text-xs text-slate-300 font-medium mt-1 leading-relaxed">
+                  Upgrade your workspace to CPROHUB Premium to publish your business profile in search results, appear on client quote discovery, and receive direct project inquiries.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowPremiumModal(true)}
+              className="w-full md:w-auto px-6 py-3 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-yellow-500/20 shrink-0 transition-all cursor-pointer"
+            >
+              Upgrade to Premium
+            </button>
+          </div>
+        )}
 
         {/* QUICK LINKS GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-12">
@@ -331,6 +366,13 @@ const DirectoryLeads = () => {
             ))}
           </div>
         )}
+        
+        <PremiumModal
+          isOpen={showPremiumModal}
+          onClose={() => setShowPremiumModal(false)}
+          featureTitle="Business Directory Leads"
+          featureDesc="Upgrade to Premium to get your company listed in the global directory, publish your services, and receive verified project leads directly from clients."
+        />
       </div>
     </DashboardShell>
   );
