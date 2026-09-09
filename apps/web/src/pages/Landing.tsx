@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+/** @jsx React.createElement */
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Calculator, Search, MapPin, ShieldCheck, Award, Tag, Smile,
