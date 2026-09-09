@@ -97,6 +97,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [isStandalone, pendingPrompt]);
 
+  // Handle automatic popup on login
   // Handle automatic popup on login & landing pages
   useEffect(() => {
     if (isStandalone) {
@@ -179,7 +180,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
     >
       {children}
 
-      {/* Non-Blocking Bottom-Corner Installation Popover */}
+      {/* Non-Blocking Top-Right Installation Popover */}
       <AnimatePresence>
         {showPopup && (
           <div className="fixed inset-0 pointer-events-none z-[9999]">
@@ -191,11 +192,11 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
 
             {/* Popover Form Card */}
             <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 15, scale: 0.95 }}
+              exit={{ opacity: 0, y: -15, scale: 0.95 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="pointer-events-auto absolute bottom-5 sm:bottom-8 right-3 sm:right-8 w-[340px] max-w-[calc(100vw-1.5rem)] bg-[#0B182B]/98 text-white border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl rounded-2xl p-4 sm:p-5 z-10"
+              className="pointer-events-auto absolute top-16 sm:top-20 right-3 sm:right-6 w-[340px] max-w-[calc(100vw-1.5rem)] bg-[#0B182B]/98 text-white border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl rounded-2xl p-4 sm:p-5 z-10"
             >
               {/* Close 'X' Button */}
               <button

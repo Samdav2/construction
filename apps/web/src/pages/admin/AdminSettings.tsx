@@ -76,6 +76,7 @@ const AdminSettings = () => {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
           <div>
             <h1 className="text-4xl font-black text-foreground tracking-tight">Global Configuration</h1>
+            <p className="text-sm text-muted-foreground font-medium italic underline underline-offset-4 decoration-blue-600/20">Master controls for Cpromark Africa Infrastructure.</p>
             <p className="text-sm text-muted-foreground font-medium italic underline underline-offset-4 decoration-blue-600/20">Master controls for CPROHUB Africa Infrastructure.</p>
           </div>
           <button 
