@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import { Download, X, Share, Plus, Smartphone, Monitor } from 'lucide-react';
 
 interface PWAContextType {
@@ -22,6 +23,7 @@ export const usePWA = () => {
 };
 
 export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -97,46 +99,32 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [isStandalone, pendingPrompt]);
 
-  // Handle automatic popup on login
-  // Handle automatic popup on login & landing pages
+  // Automatically trigger popup on landing pages and after login
   useEffect(() => {
     if (isStandalone) {
       sessionStorage.removeItem('justLoggedIn');
       return;
     }
 
-    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    const pathname = location.pathname;
     const isLandingPage = pathname === '/' || pathname === '/cprohub';
-    const hasDismissed = sessionStorage.getItem('pwa_prompt_dismissed') === 'true';
 
-    if (isLandingPage && !hasDismissed) {
+    if (isLandingPage) {
       const timer = setTimeout(() => {
         setShowPopup(true);
-      }, 1200);
+      }, 400);
       return () => clearTimeout(timer);
     }
 
-    const checkLoginTrigger = () => {
-      if (sessionStorage.getItem('justLoggedIn') === 'true') {
-        if (isIOS) {
-          // iOS Safari doesn't trigger beforeinstallprompt, show prompt immediately
-          setShowPopup(true);
-          sessionStorage.removeItem('justLoggedIn');
-        } else if (deferredPrompt) {
-          // If prompt event already fired, show it
-          setShowPopup(true);
-          sessionStorage.removeItem('justLoggedIn');
-        } else {
-          // Wait for beforeinstallprompt to fire
-          setPendingPrompt(true);
-        }
+    if (sessionStorage.getItem('justLoggedIn') === 'true') {
+      if (isIOS || deferredPrompt) {
+        setShowPopup(true);
+        sessionStorage.removeItem('justLoggedIn');
+      } else {
+        setPendingPrompt(true);
       }
-    };
-
-    // Run check shortly after load to let stores/state settle
-    const timer = setTimeout(checkLoginTrigger, 800);
-    return () => clearTimeout(timer);
-  }, [isStandalone, isIOS, deferredPrompt]);
+    }
+  }, [location.pathname, isStandalone, isIOS, deferredPrompt]);
 
   const installPWA = async () => {
     if (!deferredPrompt) {
@@ -160,12 +148,10 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleDismiss = () => {
     setShowPopup(false);
-    sessionStorage.setItem('pwa_prompt_dismissed', 'true');
   };
 
   const isInstallable = !isStandalone;
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-  const isCpromarkLanding = pathname === '/';
+  const isCpromarkLanding = location.pathname === '/';
   const appName = isCpromarkLanding ? 'Cpromark' : 'CproHub';
   const appLogo = isCpromarkLanding ? '/cpromark-logo.png' : '/cprohub-logo.jpeg';
 
@@ -185,20 +171,14 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
       {/* Non-Blocking Top-Left Installation Popover */}
       <AnimatePresence>
         {showPopup && (
-          <div className="fixed inset-0 pointer-events-none z-[9999]">
-            {/* Transparent click-outside dismisser (no dark background cover) */}
-            <div
-              className="absolute inset-0 pointer-events-auto"
-              onClick={handleDismiss}
-            />
-
+          <div className="fixed top-16 sm:top-20 left-3 sm:left-6 z-[9999] pointer-events-auto">
             {/* Popover Form Card */}
             <motion.div
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -15, scale: 0.95 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="pointer-events-auto absolute top-16 sm:top-20 left-3 sm:left-6 w-[340px] max-w-[calc(100vw-1.5rem)] bg-[#0B182B]/98 text-white border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl rounded-2xl p-4 sm:p-5 z-10"
+              className="w-[340px] max-w-[calc(100vw-1.5rem)] bg-[#0B182B]/98 text-white border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl rounded-2xl p-4 sm:p-5 relative"
             >
               {/* Close 'X' Button */}
               <button

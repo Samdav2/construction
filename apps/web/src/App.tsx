@@ -82,6 +82,7 @@ import MarketplaceProduct from './pages/MarketPlaceProduct';
 import PublicPostTender from './pages/PublicPostTender';
 import Landing from './pages/Landing';
 import CproHubLanding from './pages/CproHubLanding';
+import { PWAProvider } from './components/PWAProvider';
 
 const OwnerRoute = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute allowedRoles={['owner']}>
@@ -100,19 +101,20 @@ function App() {
 
   return (
     <Router>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: {
-            borderRadius: '16px',
-            background: '#001529',
-            color: '#fff',
-            fontSize: '12px',
-            fontWeight: 'bold',
-          },
-        }}
-      />
-      <AnimatePresence mode="wait">
+      <PWAProvider>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              borderRadius: '16px',
+              background: '#001529',
+              color: '#fff',
+              fontSize: '12px',
+              fontWeight: 'bold',
+            },
+          }}
+        />
+        <AnimatePresence mode="wait">
         <Routes>
           {/* ── WORKER PORTAL (public, mobile) ── */}
           <Route path="/worker/login" element={<WorkerLogin />} />
@@ -202,6 +204,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>
+      </PWAProvider>
     </Router>
   );
 }
