@@ -3,8 +3,6 @@ import mongoose, { Schema } from 'mongoose';
 const SettingsSchema = new Schema({
   marketplaceCommission: { type: Number, default: 2.5 },
   tenderFee: { type: Number, default: 50 },
-  aiSystemPrompt: { type: String, default: "You are BuildHub AI..." },
-  maintenanceMode: { type: Boolean, default: false }
   aiSystemPrompt: { type: String, default: "You are CPROHUB AI..." },
   maintenanceMode: { type: Boolean, default: false },
 
