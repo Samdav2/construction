@@ -81,6 +81,7 @@ import PublicMarketplace from './pages/PublicMarketPlace';
 import MarketplaceProduct from './pages/MarketPlaceProduct';
 import PublicPostTender from './pages/PublicPostTender';
 import Landing from './pages/Landing';
+import CproHubLanding from './pages/CproHubLanding';
 
 const OwnerRoute = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute allowedRoles={['owner']}>
@@ -127,6 +128,7 @@ function App() {
           <Route path="/product/:id" element={<MarketplaceProduct />} />
           <Route path="/company/:id" element={<PublicCompanyProfile />} />
           <Route path="/post-project" element={<PublicPostTender />} />
+          <Route path="/cprohub" element={<CproHubLanding />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
 
