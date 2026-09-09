@@ -205,11 +205,4 @@ function App() {
 }
 
 export default App;
-// Trigger deployment
-// Trigger Lightsail deploy
-// Test automation pipeline
-// Test deployment
-// Retry with more memory
-// Test automated build
-// Skip TypeScript check
-// Skip backend tsc
+
