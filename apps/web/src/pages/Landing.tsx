@@ -3,15 +3,13 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Calculator, Search, MapPin, ShieldCheck, Award, Tag, Smile,
-  Star, ChevronRight, Menu, FileText, Users, ShoppingCart, Download
+  Star, ChevronRight, Menu, FileText, Users, ShoppingCart
 } from 'lucide-react';
 import { PublicFooter } from '../components/layout/PublicFooter';
 import { PublicBottomNav } from '../components/layout/PublicBottomNav';
-import { usePWA } from '../components/PWAProvider';
 
 export default function Landing() {
   const navigate = useNavigate();
-  const { installPWA, isStandalone } = usePWA();
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,19 +51,6 @@ export default function Landing() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2.5 sm:gap-3">
-            {!isStandalone && (
-              <button
-                onClick={() => installPWA()}
-                className="flex items-center gap-1.5 bg-[#001529] hover:bg-slate-800 text-white text-xs font-black px-3.5 sm:px-4 py-2 rounded-full shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                title="Download Cpromark App"
-                aria-label="Download Cpromark App"
-              >
-                <Download size={13} className="text-primary" />
-                <span className="hidden xs:inline">Download</span>
-                <span>Cpromark</span>
-              </button>
-            )}
-
             {/* Right Hamburger */}
             <button className="text-brand-navy p-1 cursor-pointer">
               <Menu size={23} />

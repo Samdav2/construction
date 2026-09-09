@@ -164,8 +164,10 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const isInstallable = !isStandalone;
-  const appName = 'CproHub';
-  const appLogo = '/cprohub-logo.jpeg';
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const isCpromarkLanding = pathname === '/';
+  const appName = isCpromarkLanding ? 'Cpromark' : 'CproHub';
+  const appLogo = isCpromarkLanding ? '/cpromark-logo.png' : '/cprohub-logo.jpeg';
 
   return (
     <PWAContext.Provider
@@ -180,7 +182,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
     >
       {children}
 
-      {/* Non-Blocking Top-Right Installation Popover */}
+      {/* Non-Blocking Top-Left Installation Popover */}
       <AnimatePresence>
         {showPopup && (
           <div className="fixed inset-0 pointer-events-none z-[9999]">
@@ -196,7 +198,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -15, scale: 0.95 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="pointer-events-auto absolute top-16 sm:top-20 right-3 sm:right-6 w-[340px] max-w-[calc(100vw-1.5rem)] bg-[#0B182B]/98 text-white border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl rounded-2xl p-4 sm:p-5 z-10"
+              className="pointer-events-auto absolute top-16 sm:top-20 left-3 sm:left-6 w-[340px] max-w-[calc(100vw-1.5rem)] bg-[#0B182B]/98 text-white border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-xl rounded-2xl p-4 sm:p-5 z-10"
             >
               {/* Close 'X' Button */}
               <button

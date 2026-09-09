@@ -30,15 +30,12 @@ import {
   FolderKanban,
   Calculator,
   BrainCircuit,
-  Grid,
-  Download
+  Grid
 } from 'lucide-react';
-import { usePWA } from '../components/PWAProvider';
 
 export default function CproHubLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
-  const { installPWA, isStandalone } = usePWA();
 
   return (
     <div className="min-h-screen bg-[#061224] text-white font-['Plus_Jakarta_Sans',sans-serif] selection:bg-[#FFC107] selection:text-black overflow-x-hidden">
@@ -72,19 +69,6 @@ export default function CproHubLanding() {
 
           {/* Right Header Actions */}
           <div className="flex items-center gap-2.5 sm:gap-4">
-            {!isStandalone && (
-              <button
-                onClick={() => installPWA()}
-                className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-black px-3.5 sm:px-4 py-2 rounded-full shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                title="Download CproHub App"
-                aria-label="Download CproHub App"
-              >
-                <Download size={13} className="text-[#FFC107]" />
-                <span className="hidden xs:inline">Download</span>
-                <span>CproHub</span>
-              </button>
-            )}
-
             {/* CTA Button (Desktop) */}
             <div className="hidden md:flex items-center">
               <Link
@@ -144,18 +128,6 @@ export default function CproHubLanding() {
             >
               FAQs
             </a>
-            {!isStandalone && (
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  installPWA();
-                }}
-                className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-black py-3 rounded-full transition-all"
-              >
-                <Download size={14} className="text-[#FFC107]" />
-                <span>Download CproHub</span>
-              </button>
-            )}
             <Link
               to="/register"
               onClick={() => setMobileMenuOpen(false)}
