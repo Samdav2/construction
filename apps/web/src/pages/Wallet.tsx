@@ -12,6 +12,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DashboardShell } from '../components/layout/DashboardShell';
 import { useCurrencyStore, SUPPORTED_CURRENCIES } from '../store/useCurrencyStore';
+import { ALL_COUNTRIES, getCountryByCode } from '../lib/countries';
 
 import apiClient from '../api/client';
 import toast from 'react-hot-toast';
@@ -19,25 +20,9 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Wallet as WalletIcon, Plus, ArrowUpCircle, ArrowDownCircle,
-  Loader2, CheckCircle2, AlertCircle, DollarSign, RefreshCw,
-  ExternalLink, X, Clock, TrendingUp, Lock
+  Loader2, CheckCircle2, AlertCircle, RefreshCw,
+  ExternalLink, X, Clock, TrendingUp, Lock, Globe, ArrowRightLeft, ShieldCheck
 } from 'lucide-react';
-
-// ─── Country options that Swychr supports ────────────────────────
-const COUNTRIES = [
-  { code: 'CM', label: 'Cameroon (XAF)' },
-  { code: 'SN', label: 'Senegal (XOF)' },
-  { code: 'CI', label: "Côte d'Ivoire (XOF)" },
-  { code: 'NG', label: 'Nigeria (NGN)' },
-  { code: 'GH', label: 'Ghana (GHS)' },
-  { code: 'KE', label: 'Kenya (KES)' },
-  { code: 'ZA', label: 'South Africa (ZAR)' },
-  { code: 'EG', label: 'Egypt (EGP)' },
-  { code: 'US', label: 'United States (USD)' },
-  { code: 'GB', label: 'United Kingdom (GBP)' },
-];
-
-const QUICK_USD = [5, 10, 20, 50, 100, 200];
 
 type WalletTransaction = {
   type: 'credit' | 'debit' | string;
@@ -83,7 +68,6 @@ const VerifyBanner = ({ txId, onSuccess }: { txId: string; onSuccess: () => void
       toast.success('Wallet topped up successfully!');
       qc.invalidateQueries({ queryKey: ['wallet-balance'] });
       qc.invalidateQueries({ queryKey: ['wallet-history'] });
-      // Onboarding progression handled elsewhere; just notify and refresh data here.
       onSuccess();
     }
   }, [data, qc, onSuccess]);
@@ -92,7 +76,7 @@ const VerifyBanner = ({ txId, onSuccess }: { txId: string; onSuccess: () => void
     return (
       <div className="flex items-center gap-3 bg-emerald-500/15 border border-emerald-500/30 rounded-2xl px-5 py-4 mb-6">
         <CheckCircle2 className="text-emerald-400 shrink-0" size={20} />
-        <p className="text-sm font-bold text-emerald-300">Payment confirmed! Your wallet has been credited.</p>
+        <p className="text-sm font-bold text-emerald-300">Payment confirmed! Your wallet has been credited in USD.</p>
       </div>
     );
   }
@@ -117,44 +101,62 @@ const VerifyBanner = ({ txId, onSuccess }: { txId: string; onSuccess: () => void
 // ─── TopUp Modal ──────────────────────────────────────────────────
 const TopUpModal = ({ onClose, initialCountryCode, isCurrencyLocked }: { onClose: () => void; initialCountryCode?: string; isCurrencyLocked?: boolean }) => {
   const { setCurrency } = useCurrencyStore();
-  const [usdAmount, setUsdAmount] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [countryCode, setCountryCode] = useState(initialCountryCode || 'CM');
-  const [ratePreview, setRatePreview] = useState<{ localAmount: number; currency: string } | null>(null);
-  const [loadingRate, setLoadingRate] = useState(false);
-  const usdValue = Number(usdAmount) || 0;
+  const selectedCountry = getCountryByCode(countryCode);
 
-  // Live rate fetch whenever usdAmount or countryCode changes
+  const [localAmount, setLocalAmount] = useState<string>(String(selectedCountry.suggestedAmounts[1] || 10000));
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [ratePreview, setRatePreview] = useState<{ usd: number; rate: number; currency: string } | null>(null);
+  const [loadingRate, setLoadingRate] = useState(false);
+
+  const numLocal = Number(localAmount) || 0;
+
+  // Sync currency store when country changes
   useEffect(() => {
-    const usd = Number(usdAmount);
-    if (!usd || usd <= 0) { setRatePreview(null); return; }
+    const match = SUPPORTED_CURRENCIES.find((c) => c.code === selectedCountry.currency);
+    if (match) setCurrency(match);
+  }, [selectedCountry.currency, setCurrency]);
+
+  // Live rate fetch (Local Currency → USD) whenever localAmount or countryCode changes
+  useEffect(() => {
+    const amount = Number(localAmount);
+    if (!amount || amount <= 0) {
+      setRatePreview(null);
+      return;
+    }
+
     const timer = setTimeout(async () => {
       setLoadingRate(true);
       try {
-        const { data } = await apiClient.get('/wallet/rate', { params: { amount: usd, countryCode } });
-        setRatePreview({ localAmount: data.localAmount, currency: data.currency });
-        // Sync currency store with chosen country currency
-        const match = SUPPORTED_CURRENCIES.find((c) => c.code === data.currency);
-        if (match) setCurrency(match);
+        const { data } = await apiClient.get('/wallet/rate', {
+          params: { from: 'local', localAmount: amount, countryCode }
+        });
+        setRatePreview({
+          usd: data.usd,
+          rate: data.rate || (amount / (data.usd || 1)),
+          currency: data.currency || selectedCountry.currency
+        });
       } catch {
-        // Fallback to local calculation
-        const FALLBACK: Record<string, number> = {
-          XAF: 600, XOF: 600, NGN: 1600, GHS: 15, KES: 130, ZAR: 19, EGP: 48, USD: 1, GBP: 0.79,
+        // Fallback calculation
+        const FALLBACK_RATES: Record<string, number> = {
+          XAF: 600, XOF: 600, NGN: 1600, GHS: 15, KES: 130, ZAR: 19, EGP: 48,
+          RWF: 1350, TZS: 2600, UGX: 3700, USD: 1, EUR: 0.92, GBP: 0.79,
         };
-        const curr = COUNTRIES.find((c) => c.code === countryCode)?.label.match(/\((\w+)\)/)?.[1] ?? 'XAF';
-        const rate = FALLBACK[curr] ?? 600;
-        setRatePreview({ localAmount: Math.ceil(usd * rate), currency: curr });
+        const rate = FALLBACK_RATES[selectedCountry.currency] ?? 600;
+        const usd = Number((amount / rate).toFixed(2));
+        setRatePreview({ usd, rate, currency: selectedCountry.currency });
       } finally {
         setLoadingRate(false);
       }
-    }, 500);
+    }, 350);
+
     return () => clearTimeout(timer);
-  }, [usdAmount, countryCode]);
+  }, [localAmount, countryCode, selectedCountry.currency]);
 
   const initiateMutation = useMutation({
     mutationFn: async () => {
       const { data } = await apiClient.post('/wallet/topup-initiate', {
-        amountUSD: usdValue,
+        amountLocal: numLocal,
         countryCode,
         phoneNumber: phoneNumber.trim(),
       });
@@ -169,141 +171,194 @@ const TopUpModal = ({ onClose, initialCountryCode, isCurrencyLocked }: { onClose
     },
   });
 
+  const usdValue = ratePreview?.usd ?? (numLocal > 0 ? Number((numLocal / 600).toFixed(2)) : 0);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
         initial={{ scale: 0.95, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.95, y: 20 }}
-        className="bg-card rounded-[2.5rem] w-full max-w-md shadow-2xl border border-border p-8"
+        className="bg-card text-foreground rounded-[2.5rem] w-full max-w-lg shadow-2xl border border-border p-6 sm:p-8 my-8 relative"
       >
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary/15 rounded-2xl flex items-center justify-center">
-              <WalletIcon size={20} className="text-primary" />
+            <div className="w-11 h-11 bg-primary/15 rounded-2xl flex items-center justify-center text-primary">
+              <WalletIcon size={22} />
             </div>
-            <h2 className="text-xl font-black text-white">Top Up Wallet</h2>
+            <div>
+              <h2 className="text-xl font-black text-foreground">Fund Your Wallet</h2>
+              <p className="text-xs text-muted-foreground font-medium">Deposit in your local currency & receive USD</p>
+            </div>
           </div>
-          <button onClick={onClose} className="text-white/30 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-xl hover:bg-muted">
             <X size={20} />
           </button>
         </div>
 
         {/* Country selector */}
         <div className="mb-5">
-          <label className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1.5 flex items-center gap-2">
-            Your Payment Country
-            {isCurrencyLocked && <Lock size={12} className="text-black/30" />}
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 flex items-center justify-between">
+            <span>Payment Country & Base Currency</span>
+            {isCurrencyLocked && <span className="flex items-center gap-1 text-[9px] text-amber-500 font-bold"><Lock size={10} /> Locked</span>}
           </label>
-          <select
-            value={countryCode}
-            disabled={isCurrencyLocked}
-            onChange={(e) => setCountryCode(e.target.value)}
-            className="w-full px-4 py-3.5 bg-white/5 rounded-2xl text-sm font-medium text-black border border-black/5 outline-none focus:ring-2 focus:ring-primary/30 appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code} className="bg-white">{c.label}</option>
-            ))}
-          </select>
-          {isCurrencyLocked && (
-            <p className="text-[10px] text-white/30 mt-1">Currency is locked permanently after your first deposit.</p>
-          )}
-        </div>
-
-        {/* Quick amounts */}
-        <div className="mb-5">
-          <label className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1.5 block">Quick Select (USD)</label>
-          <div className="grid grid-cols-3 gap-2">
-            {QUICK_USD.map((a) => (
-              <button
-                key={a}
-                type="button"
-                onClick={() => setUsdAmount(String(a))}
-                className={`py-3 rounded-xl font-black text-sm transition-all ${String(a) === usdAmount ? 'bg-primary text-brand-navy' : 'bg-white/5 text-black/60 hover:bg-white/10 border border-black/5'}`}
-              >
-                ${a}
-              </button>
-            ))}
+          <div className="relative">
+            <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" size={18} />
+            <select
+              value={countryCode}
+              disabled={isCurrencyLocked}
+              onChange={(e) => {
+                setCountryCode(e.target.value);
+                const nextCountry = getCountryByCode(e.target.value);
+                setLocalAmount(String(nextCountry.suggestedAmounts[1] || 10000));
+              }}
+              className="w-full pl-12 pr-10 py-3.5 bg-muted rounded-2xl text-sm font-semibold text-foreground border border-border outline-none focus:ring-2 focus:ring-primary/40 appearance-none disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+            >
+              {ALL_COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code} className="bg-background text-foreground py-1">
+                  {c.flag} {c.name} — {c.currency} ({c.currencySymbol})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Custom amount */}
+        {/* Quick select amounts in base currency */}
         <div className="mb-5">
-          <label className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1.5 block">Custom Amount (USD)</label>
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            Quick Select ({selectedCountry.currency})
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {selectedCountry.suggestedAmounts.map((amt) => {
+              const isSelected = String(amt) === String(localAmount);
+              return (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() => setLocalAmount(String(amt))}
+                  className={`py-3 px-2 rounded-xl font-black text-xs sm:text-sm transition-all text-center ${
+                    isSelected
+                      ? 'bg-primary text-slate-950 shadow-md shadow-yellow-500/20 scale-[1.02]'
+                      : 'bg-muted text-foreground/80 hover:bg-muted/80 border border-border/60'
+                  }`}
+                >
+                  {amt.toLocaleString()} {selectedCountry.currencySymbol}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Custom amount in base currency */}
+        <div className="mb-5">
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            Amount to Deposit ({selectedCountry.currency})
+          </label>
           <div className="relative">
-            <DollarSign size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-black/30" />
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-sm text-muted-foreground">
+              {selectedCountry.currencySymbol}
+            </span>
             <input
               type="number"
-              min="1"
-              placeholder="Enter amount in USD"
-              value={usdAmount}
-              onChange={(e) => setUsdAmount(e.target.value)}
-              className="w-full pl-10 pr-4 py-3.5 bg-white/5 rounded-2xl text-sm font-medium text-black placeholder-black/25 border border-black/5 outline-none focus:ring-2 focus:ring-primary/30"
+              min="100"
+              placeholder={`Enter amount in ${selectedCountry.currency}`}
+              value={localAmount}
+              onChange={(e) => setLocalAmount(e.target.value)}
+              className="w-full pl-14 pr-16 py-3.5 bg-muted rounded-2xl text-base font-bold text-foreground placeholder:text-muted-foreground/50 border border-border outline-none focus:ring-2 focus:ring-primary/40"
             />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-muted-foreground uppercase">
+              {selectedCountry.currency}
+            </span>
           </div>
         </div>
 
-        {/* Mobile Money / Phone Number */}
-        <div className="mb-5">
-          <label className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1.5 block">Mobile Money / Phone Number</label>
-          <input
-            type="tel"
-            placeholder="e.g. 670123456 or +237670123456"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            className="w-full px-4 py-3.5 bg-white/5 rounded-2xl text-sm font-medium text-black placeholder-black/25 border border-black/5 outline-none focus:ring-2 focus:ring-primary/30"
-          />
-        </div>
-
-        {/* Conversion preview */}
+        {/* Live Converter Display */}
         <AnimatePresence>
-          {(ratePreview || loadingRate) && Number(usdAmount) > 0 && (
+          {numLocal > 0 && (
             <motion.div
-              initial={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="bg-primary/10 border border-primary/20 rounded-2xl px-5 py-4 mb-5 flex items-center justify-between"
+              className="bg-primary/10 border border-primary/25 rounded-2xl p-4.5 mb-5 relative overflow-hidden"
             >
-              <div className="flex items-center justify-between mb-2 gap-3">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.22em] text-foreground/40 font-black">Local payment preview</p>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-primary">
+                  <ArrowRightLeft size={14} />
+                  <span>Live Currency Conversion</span>
                 </div>
-                {loadingRate ? (
-                  <Loader2 size={20} className="text-primary animate-spin" />
-                ) : (
-                  <div className="text-right">
-                    <p className="text-2xl font-black text-primary leading-none">
-                      {ratePreview?.localAmount?.toLocaleString()} {ratePreview?.currency}
-                    </p>
-                    <p className="text-xs text-foreground/40">for ${usdValue.toFixed(2)} USD</p>
-                  </div>
-                )}
+                {loadingRate && <Loader2 size={14} className="text-primary animate-spin" />}
               </div>
+
+              <div className="flex items-baseline justify-between gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium">You deposit</p>
+                  <p className="text-lg font-black text-foreground">
+                    {numLocal.toLocaleString()} {selectedCountry.currency}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground font-medium">Wallet credited</p>
+                  <p className="text-2xl font-black text-primary tracking-tight">
+                    ${usdValue.toFixed(2)} <span className="text-xs text-foreground/50 font-bold">USD</span>
+                  </p>
+                </div>
+              </div>
+
+              {ratePreview?.rate && (
+                <div className="mt-2.5 pt-2.5 border-t border-primary/15 flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span>Exchange Rate:</span>
+                  <span className="font-bold text-foreground">1 USD ≈ {Math.round(ratePreview.rate).toLocaleString()} {selectedCountry.currency}</span>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
 
+        {/* Mobile Money / Phone Number */}
+        <div className="mb-6">
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1.5 block">
+            Mobile Money / Phone Number
+          </label>
+          <input
+            type="tel"
+            placeholder={`e.g. ${selectedCountry.phonePrefix} 670123456`}
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            className="w-full px-4 py-3.5 bg-muted rounded-2xl text-sm font-medium text-foreground placeholder:text-muted-foreground/50 border border-border outline-none focus:ring-2 focus:ring-primary/40"
+          />
+        </div>
+
         <button
           type="button"
           onClick={() => initiateMutation.mutate()}
-          disabled={!usdAmount || Number(usdAmount) < 1 || initiateMutation.isPending}
-          className="w-full py-4 bg-primary text-brand-navy rounded-2xl font-black text-sm flex items-center justify-center gap-2 hover:scale-[1.02] transition-all shadow-yellow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          disabled={!localAmount || numLocal <= 0 || initiateMutation.isPending}
+          className="w-full py-4.5 bg-primary text-slate-950 rounded-2xl font-black text-sm flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg shadow-yellow-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer"
         >
-          {initiateMutation.isPending
-            ? <><Loader2 size={18} className="animate-spin" /> Creating payment link…</>
-            : <><ExternalLink size={18} /> Pay ${usdValue.toFixed(2)} USD • local conversion shown</>
-          }
+          {initiateMutation.isPending ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              <span>Generating Payment Link…</span>
+            </>
+          ) : (
+            <>
+              <ExternalLink size={18} />
+              <span>
+                Deposit {numLocal.toLocaleString()} {selectedCountry.currency} • Credit ${usdValue.toFixed(2)} USD
+              </span>
+            </>
+          )}
         </button>
 
-        <p className="text-center text-[11px] text-white/30 mt-4">
-          Secured by Swychr · You will be redirected to complete payment
-        </p>
+        <div className="flex items-center justify-center gap-1.5 text-center text-[11px] text-muted-foreground mt-4">
+          <ShieldCheck size={14} className="text-primary" />
+          <span>Secured by Swychr & AccountPe • Safe instant settlement</span>
+        </div>
       </motion.div>
     </motion.div>
   );

@@ -171,7 +171,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
       {/* Non-Blocking Top-Left Installation Popover */}
       <AnimatePresence>
         {showPopup && (
-          <div className="fixed top-16 sm:top-20 left-3 sm:left-6 z-[9999] pointer-events-auto">
+          <div className={`fixed top-16 sm:top-20 left-3 sm:left-6 z-[9999] pointer-events-auto ${location.pathname === '/cprohub' && !showInstructions ? 'hidden md:block' : ''}`}>
             {/* Popover Form Card */}
             <motion.div
               initial={{ opacity: 0, y: -20, scale: 0.95 }}

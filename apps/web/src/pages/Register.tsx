@@ -9,6 +9,8 @@ import {
   User,
   Mail,
   Lock,
+  Globe,
+  ChevronDown,
   CheckCircle2,
   ShieldCheck
 } from 'lucide-react';
@@ -17,6 +19,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../store/useAuthStore';
 import apiClient from '../api/client';
 import { PublicNavbar } from '../components/layout/PublicNavbar';
+import { ALL_COUNTRIES } from '../lib/countries';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +30,8 @@ const Register = () => {
     name: '',
     email: '',
     password: '',
+    countryCode: 'CM',
+    country: 'Cameroon',
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -162,6 +167,31 @@ const Register = () => {
                 required
                 className="w-full p-4.5 pl-12 bg-muted border border-border/50 rounded-2xl outline-none focus:ring-2 focus:ring-primary/40 transition-all font-semibold text-sm text-foreground placeholder:text-muted-foreground"
               />
+            </div>
+
+            {/* Country Selector */}
+            <div className="relative">
+              <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/35 pointer-events-none" size={18} />
+              <select
+                value={formData.countryCode}
+                onChange={(e) => {
+                  const c = ALL_COUNTRIES.find((opt) => opt.code === e.target.value);
+                  setFormData({
+                    ...formData,
+                    countryCode: e.target.value,
+                    country: c ? c.name : e.target.value,
+                  });
+                }}
+                required
+                className="w-full p-4.5 pl-12 pr-10 bg-muted border border-border/50 rounded-2xl outline-none focus:ring-2 focus:ring-primary/40 transition-all font-semibold text-sm text-foreground appearance-none cursor-pointer"
+              >
+                {ALL_COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code} className="bg-background text-foreground py-1">
+                    {c.flag} {c.name} ({c.currency})
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/35 pointer-events-none" size={18} />
             </div>
 
             {/* Password */}

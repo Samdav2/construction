@@ -30,12 +30,15 @@ import {
   FolderKanban,
   Calculator,
   BrainCircuit,
-  Grid
+  Grid,
+  Download
 } from 'lucide-react';
+import { usePWA } from '../components/PWAProvider';
 
 export default function CproHubLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const { isStandalone, installPWA } = usePWA();
 
   return (
     <div className="min-h-screen bg-[#061224] text-white font-['Plus_Jakarta_Sans',sans-serif] selection:bg-[#FFC107] selection:text-black overflow-x-hidden">
@@ -68,7 +71,7 @@ export default function CproHubLanding() {
           </div>
 
           {/* Right Header Actions */}
-          <div className="flex items-center gap-2.5 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* CTA Button (Desktop) */}
             <div className="hidden md:flex items-center">
               <Link
@@ -78,6 +81,19 @@ export default function CproHubLanding() {
                 Get Started Free
               </Link>
             </div>
+
+            {/* Mobile PWA Install Button (Only on Mobile View) */}
+            {!isStandalone && (
+              <button
+                type="button"
+                onClick={installPWA}
+                className="md:hidden flex items-center gap-1.5 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 text-xs font-black px-3.5 py-1.5 rounded-full shadow-sm active:scale-95 transition-all cursor-pointer"
+                aria-label="Install App"
+              >
+                <Download size={13} strokeWidth={2.5} />
+                <span>Install App</span>
+              </button>
+            )}
 
             {/* Mobile Hamburger Toggle */}
             <button
@@ -128,6 +144,21 @@ export default function CproHubLanding() {
             >
               FAQs
             </a>
+
+            {!isStandalone && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  installPWA();
+                }}
+                className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white font-bold text-sm py-2.5 rounded-xl transition-all cursor-pointer"
+              >
+                <Download size={15} className="text-[#FFC107]" />
+                <span>Install CproHub App</span>
+              </button>
+            )}
+
             <Link
               to="/register"
               onClick={() => setMobileMenuOpen(false)}
