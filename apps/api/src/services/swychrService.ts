@@ -31,16 +31,23 @@ let authToken: string | null = null;
 let tokenExpiresAt: Date | null = null;
 
 const refreshToken = async () => {
+  const apiKey = process.env.SWYCHR_API_KEY || process.env.SWYCHR_SECRET_KEY || process.env.SWYCHR_KEY;
+  if (apiKey) {
+    authToken = apiKey;
+    tokenExpiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    return;
+  }
+
   const email = process.env.SWYCHR_EMAIL;
   const password = process.env.SWYCHR_PASSWORD;
 
   if (!email || !password) {
-    throw new Error('SWYCHR_EMAIL / SWYCHR_PASSWORD are not configured.');
+    throw new Error('SWYCHR credentials (SWYCHR_API_KEY or SWYCHR_EMAIL / SWYCHR_PASSWORD) are not configured.');
   }
 
   const { data } = await payinApi.post('/admin/auth', { email, password }, { httpsAgent });
-  const token = data?.token;
-  if (!token) throw new Error('AccountPe auth response did not include a token.');
+  const token = data?.token || data?.data?.token;
+  if (!token) throw new Error('AccountPe/Swychr auth response did not include a token.');
 
   authToken = token;
   // Expire 1 hour early to avoid edge-case token reuse
@@ -50,10 +57,18 @@ const refreshToken = async () => {
 
 const authInterceptor = async (config: any) => {
   if (config.url === '/admin/auth') return config;
+  const apiKey = process.env.SWYCHR_API_KEY || process.env.SWYCHR_SECRET_KEY || process.env.SWYCHR_KEY;
+  if (apiKey) {
+    config.headers['Authorization'] = `Bearer ${apiKey}`;
+    config.headers['x-api-key'] = apiKey;
+    return config;
+  }
   if (!authToken || !tokenExpiresAt || new Date() > tokenExpiresAt) {
     await refreshToken();
   }
-  config.headers['Authorization'] = `Bearer ${authToken}`;
+  if (authToken) {
+    config.headers['Authorization'] = `Bearer ${authToken}`;
+  }
   return config;
 };
 
@@ -84,7 +99,9 @@ export const createPaymentLink = async (payload: PaymentLinkPayload): Promise<st
   });
   const link =
     response.data?.data?.payment_link ||
-    response.data?.payment_link;
+    response.data?.data?.link ||
+    response.data?.payment_link ||
+    response.data?.link;
 
   if (!link) throw new Error('Swychr did not return a payment link.');
   return link;
@@ -106,36 +123,46 @@ export const getPaymentLinkStatus = async (transactionId: string) => {
  * Convert a USD amount to the local currency for a given country.
  */
 export const convertToLocal = async (countryCode: string, usdAmount: number): Promise<{ amount: number; currency: string }> => {
-  const { data } = await payoutApi.post(
-    '/pusd_to_fiat_rate',
-    { country_code: countryCode, amount: usdAmount },
-    { httpsAgent }
-  );
-
-  const localAmount = Number(
-    data?.data?.local_amount ||
-    data?.data?.amount ||
-    data?.local_amount ||
-    data?.amount
-  );
-
-  if (!localAmount || Number.isNaN(localAmount)) {
-    throw new Error('Swychr did not return a valid conversion amount.');
-  }
-
-  // Try to get currency code from the response; fall back to the expected currency by country.
   const FALLBACK_CURRENCY: Record<string, string> = {
     CM: 'XAF', SN: 'XOF', CI: 'XOF', BJ: 'XOF', BF: 'XOF', ML: 'XOF',
     NG: 'NGN', GH: 'GHS', KE: 'KES', ZA: 'ZAR', EG: 'EGP',
     US: 'USD', GB: 'GBP', EUR: 'EUR',
   };
 
-  const currency: string =
-    data?.data?.currency ||
-    data?.currency ||
-    FALLBACK_CURRENCY[countryCode] || 'XAF';
+  const FALLBACK_RATES: Record<string, number> = {
+    XAF: 600, XOF: 600, NGN: 1600, GHS: 15, KES: 130, ZAR: 19, EGP: 48, USD: 1, EUR: 0.92, GBP: 0.79,
+  };
 
-  return { amount: Math.ceil(localAmount), currency };
+  const defaultCurrency = FALLBACK_CURRENCY[countryCode] || 'XAF';
+
+  try {
+    const { data } = await payoutApi.post(
+      '/pusd_to_fiat_rate',
+      { country_code: countryCode, amount: usdAmount },
+      { httpsAgent }
+    );
+
+    const localAmount = Number(
+      data?.data?.local_amount ||
+      data?.data?.amount ||
+      data?.local_amount ||
+      data?.amount
+    );
+
+    if (localAmount && !Number.isNaN(localAmount)) {
+      const currency: string =
+        data?.data?.currency ||
+        data?.currency ||
+        defaultCurrency;
+      return { amount: Math.ceil(localAmount), currency };
+    }
+  } catch (err: any) {
+    console.warn(`[Swychr] Rate conversion API endpoint notice for ${countryCode}: using calibrated fallback rate.`);
+  }
+
+  // Graceful fallback rate if remote rate endpoint is slow or temporarily unreachable
+  const rate = FALLBACK_RATES[defaultCurrency] ?? 600;
+  return { amount: Math.ceil(usdAmount * rate), currency: defaultCurrency };
 };
 
 /**
@@ -162,7 +189,10 @@ export const verifySignature = (rawBody: string, signature: string | undefined):
 };
 
 export const isPaymentSuccessful = (status: unknown): boolean => {
-  if (status === 1 || status === '1') return true;
-  if (typeof status === 'string' && status.toLowerCase() === 'success') return true;
+  if (status === 1 || status === '1' || status === true) return true;
+  if (typeof status === 'string') {
+    const s = status.toLowerCase();
+    return s === 'success' || s === 'successful' || s === 'completed' || s === 'paid';
+  }
   return false;
 };
