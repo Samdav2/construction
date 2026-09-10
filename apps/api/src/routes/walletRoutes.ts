@@ -129,8 +129,10 @@ router.post('/topup-initiate', protect, async (req: any, res) => {
     const usdCents = Math.round(parsedUSD * 100);
     const txId = buildTxId(company._id.toString(), usdCents);
 
-    const backendBase = (process.env.BACKEND_URL || '').replace(/\/api\/?$/, '');
+    const backendBase = (process.env.BACKEND_URL || '').replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '');
     const callbackUrl = `${backendBase}/api/v1/wallet/callback?transaction_id=${txId}`;
+
+    const mobileNumber = req.body.phoneNumber || req.body.phone || company.phone || company.receiptSettings?.whatsappNumber;
 
     const paymentLink = await createPaymentLink({
       country_code: countryCode,
@@ -138,8 +140,12 @@ router.post('/topup-initiate', protect, async (req: any, res) => {
       amount: localAmount,
       name: company.name,
       email: user!.email,
+      phone_number: mobileNumber,
+      mobile_number: mobileNumber,
+      phone: mobileNumber,
+      mobile: mobileNumber,
       transaction_id: txId,
-      description: `BuildHub wallet top-up — ${company.name}`,
+      description: `CPROHUB wallet top-up — ${company.name}`,
       pass_digital_charge: true,
       callback_url: callbackUrl,
     });

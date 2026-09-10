@@ -49,7 +49,21 @@ export const PremiumModal = ({
   const queryClient = useQueryClient();
   const [step, setStep] = useState<'overview' | 'checkout' | 'verifying'>('overview');
   const [selectedCountry, setSelectedCountry] = useState('CM');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [activeTxId, setActiveTxId] = useState<string | null>(null);
+
+  // Fetch company profile to prefill phone if available
+  const { data: company } = useQuery({
+    queryKey: ['company-profile'],
+    queryFn: async () => (await apiClient.get('/auth/company/profile')).data,
+    enabled: isOpen
+  });
+
+  useEffect(() => {
+    if (company?.phone || company?.receiptSettings?.whatsappNumber) {
+      setPhoneNumber(company.phone || company.receiptSettings?.whatsappNumber || '');
+    }
+  }, [company]);
 
   // Fetch admin configured subscription settings
   const { data: config } = useQuery({
@@ -100,8 +114,8 @@ export const PremiumModal = ({
 
   // Initiate Swychr Checkout Mutation
   const initiateMutation = useMutation({
-    mutationFn: async (countryCode: string) => {
-      const res = await apiClient.post('/auth/company/subscribe-initiate', { countryCode });
+    mutationFn: async (payload: { countryCode: string; phoneNumber?: string }) => {
+      const res = await apiClient.post('/auth/company/subscribe-initiate', payload);
       return res.data;
     },
     onSuccess: (data) => {
@@ -124,7 +138,7 @@ export const PremiumModal = ({
   };
 
   const handleStartCheckout = () => {
-    initiateMutation.mutate(selectedCountry);
+    initiateMutation.mutate({ countryCode: selectedCountry, phoneNumber: phoneNumber.trim() });
   };
 
   return (
@@ -282,6 +296,20 @@ export const PremiumModal = ({
                       </option>
                     ))}
                   </select>
+                </div>
+
+                {/* Mobile Money / Phone Number */}
+                <div className="space-y-1.5 mb-5">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-300 block">
+                    Mobile Money / Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="e.g. 670123456 or +237670123456"
+                    className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/15 text-white placeholder-white/30 text-xs font-semibold outline-none focus:border-[#FFC107] transition-all"
+                  />
                 </div>
 
                 {/* Converted Amount Summary Box */}

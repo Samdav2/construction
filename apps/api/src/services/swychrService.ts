@@ -94,6 +94,10 @@ export interface PaymentLinkPayload {
   amount: number;
   name: string;
   email: string;
+  phone_number?: string;
+  mobile_number?: string;
+  phone?: string;
+  mobile?: string;
   transaction_id: string;
   description: string;
   pass_digital_charge?: boolean;
@@ -101,12 +105,48 @@ export interface PaymentLinkPayload {
 }
 
 /**
+ * Format and return a valid mobile number for the specified country.
+ */
+export const getValidMobileNumber = (rawPhone: string | undefined, countryCode: string): string => {
+  if (rawPhone && typeof rawPhone === 'string') {
+    const cleaned = rawPhone.replace(/[^\d+]/g, '');
+    if (cleaned.length >= 8) return cleaned;
+  }
+  const DEFAULTS: Record<string, string> = {
+    CM: '670000000',
+    SN: '770000000',
+    CI: '0700000000',
+    NG: '08012345678',
+    GH: '0241234567',
+    KE: '0712345678',
+    ZA: '0821234567',
+    EG: '01012345678',
+    US: '2025550123',
+    GB: '7911123456',
+  };
+  return DEFAULTS[countryCode] || '670000000';
+};
+
+/**
  * Create a hosted payment link. Returns the URL string or throws.
  */
 export const createPaymentLink = async (payload: PaymentLinkPayload): Promise<string> => {
   try {
-    console.log('[Swychr] Creating payment link with payload:', JSON.stringify(payload));
-    const response = await payinApi.post('/create_payment_links', payload, {
+    const mobile = getValidMobileNumber(
+      payload.mobile_number || payload.phone_number || payload.phone || payload.mobile,
+      payload.country_code
+    );
+
+    const formattedPayload = {
+      ...payload,
+      mobile_number: mobile,
+      phone_number: mobile,
+      phone: mobile,
+      mobile: mobile,
+    };
+
+    console.log('[Swychr] Creating payment link with payload:', JSON.stringify(formattedPayload));
+    const response = await payinApi.post('/create_payment_links', formattedPayload, {
       httpsAgent,
       headers: { 'Idempotency-Key': payload.transaction_id },
     });

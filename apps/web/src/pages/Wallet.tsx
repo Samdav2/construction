@@ -118,6 +118,7 @@ const VerifyBanner = ({ txId, onSuccess }: { txId: string; onSuccess: () => void
 const TopUpModal = ({ onClose, initialCountryCode, isCurrencyLocked }: { onClose: () => void; initialCountryCode?: string; isCurrencyLocked?: boolean }) => {
   const { setCurrency } = useCurrencyStore();
   const [usdAmount, setUsdAmount] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [countryCode, setCountryCode] = useState(initialCountryCode || 'CM');
   const [ratePreview, setRatePreview] = useState<{ localAmount: number; currency: string } | null>(null);
   const [loadingRate, setLoadingRate] = useState(false);
@@ -155,6 +156,7 @@ const TopUpModal = ({ onClose, initialCountryCode, isCurrencyLocked }: { onClose
       const { data } = await apiClient.post('/wallet/topup-initiate', {
         amountUSD: usdValue,
         countryCode,
+        phoneNumber: phoneNumber.trim(),
       });
       return data;
     },
@@ -245,6 +247,18 @@ const TopUpModal = ({ onClose, initialCountryCode, isCurrencyLocked }: { onClose
               className="w-full pl-10 pr-4 py-3.5 bg-white/5 rounded-2xl text-sm font-medium text-black placeholder-black/25 border border-black/5 outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
+        </div>
+
+        {/* Mobile Money / Phone Number */}
+        <div className="mb-5">
+          <label className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1.5 block">Mobile Money / Phone Number</label>
+          <input
+            type="tel"
+            placeholder="e.g. 670123456 or +237670123456"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            className="w-full px-4 py-3.5 bg-white/5 rounded-2xl text-sm font-medium text-black placeholder-black/25 border border-black/5 outline-none focus:ring-2 focus:ring-primary/30"
+          />
         </div>
 
         {/* Conversion preview */}

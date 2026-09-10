@@ -532,8 +532,10 @@ export const initiateSubscriptionPayment = async (req: any, res: Response) => {
     const usdCents = Math.round(fee * 100);
     const txId = `BH-PREMIUM-${company._id}-${usdCents}-${Date.now()}`;
 
-    const backendBase = (process.env.BACKEND_URL || '').replace(/\/api\/?$/, '');
+    const backendBase = (process.env.BACKEND_URL || '').replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '');
     const callbackUrl = `${backendBase}/api/v1/auth/company/subscribe-callback?transaction_id=${txId}`;
+
+    const mobileNumber = req.body.phoneNumber || req.body.phone || company.phone || company.receiptSettings?.whatsappNumber;
 
     const paymentLink = await createPaymentLink({
       country_code: countryCode,
@@ -541,6 +543,10 @@ export const initiateSubscriptionPayment = async (req: any, res: Response) => {
       amount: localAmount,
       name: company.name || user.name,
       email: user.email,
+      phone_number: mobileNumber,
+      mobile_number: mobileNumber,
+      phone: mobileNumber,
+      mobile: mobileNumber,
       transaction_id: txId,
       description: `CPROHUB Premium Subscription — ${company.name || user.name}`,
       pass_digital_charge: true,
