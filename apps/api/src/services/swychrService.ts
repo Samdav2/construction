@@ -19,11 +19,13 @@ const httpsAgent = ALLOW_INSECURE ? new https.Agent({ rejectUnauthorized: false 
 const payinApi = axios.create({
   baseURL: 'https://api.accountpe.com/api/payin',
   headers: { 'Content-Type': 'application/json' },
+  timeout: 10000,
 });
 
 const payoutApi = axios.create({
   baseURL: 'https://api.accountpe.com/api/payout',
   headers: { 'Content-Type': 'application/json' },
+  timeout: 4000,
 });
 
 // ─── Auth token cache ─────────────────────────────────────────────
@@ -33,34 +35,43 @@ let tokenExpiresAt: Date | null = null;
 const refreshToken = async () => {
   const apiKey = process.env.SWYCHR_API_KEY || process.env.SWYCHR_SECRET_KEY || process.env.SWYCHR_KEY;
   if (apiKey) {
-    authToken = apiKey;
+    authToken = apiKey.trim();
     tokenExpiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    console.log('[Swychr] Using SWYCHR_API_KEY from environment.');
     return;
   }
 
-  const email = process.env.SWYCHR_EMAIL;
-  const password = process.env.SWYCHR_PASSWORD;
+  const email = process.env.SWYCHR_EMAIL?.trim();
+  const password = process.env.SWYCHR_PASSWORD?.trim();
 
   if (!email || !password) {
     throw new Error('SWYCHR credentials (SWYCHR_API_KEY or SWYCHR_EMAIL / SWYCHR_PASSWORD) are not configured.');
   }
 
-  const { data } = await payinApi.post('/admin/auth', { email, password }, { httpsAgent });
-  const token = data?.token || data?.data?.token;
-  if (!token) throw new Error('AccountPe/Swychr auth response did not include a token.');
+  try {
+    console.log(`[Swychr] Authenticating with email: ${email}`);
+    const { data } = await payinApi.post('/admin/auth', { email, password }, { httpsAgent });
+    console.log('[Swychr] Auth response:', JSON.stringify(data));
+    const token = data?.token || data?.data?.token || data?.access_token || data?.data?.access_token;
+    if (!token) throw new Error(data?.message || 'AccountPe/Swychr auth response did not include a token.');
 
-  authToken = token;
-  // Expire 1 hour early to avoid edge-case token reuse
-  tokenExpiresAt = new Date(Date.now() + 22 * 60 * 60 * 1000);
-  console.log('[Swychr] Auth token refreshed.');
+    authToken = token;
+    // Expire 1 hour early to avoid edge-case token reuse
+    tokenExpiresAt = new Date(Date.now() + 22 * 60 * 60 * 1000);
+    console.log('[Swychr] Auth token refreshed successfully.');
+  } catch (err: any) {
+    const errorDetails = err.response?.data ? JSON.stringify(err.response.data) : err.message;
+    console.error('[Swychr] Auth failed:', errorDetails);
+    throw new Error(`AccountPe/Swychr auth failed: ${err.response?.data?.message || err.message}`);
+  }
 };
 
 const authInterceptor = async (config: any) => {
   if (config.url === '/admin/auth') return config;
   const apiKey = process.env.SWYCHR_API_KEY || process.env.SWYCHR_SECRET_KEY || process.env.SWYCHR_KEY;
   if (apiKey) {
-    config.headers['Authorization'] = `Bearer ${apiKey}`;
-    config.headers['x-api-key'] = apiKey;
+    config.headers['Authorization'] = `Bearer ${apiKey.trim()}`;
+    config.headers['x-api-key'] = apiKey.trim();
     return config;
   }
   if (!authToken || !tokenExpiresAt || new Date() > tokenExpiresAt) {
@@ -93,18 +104,39 @@ export interface PaymentLinkPayload {
  * Create a hosted payment link. Returns the URL string or throws.
  */
 export const createPaymentLink = async (payload: PaymentLinkPayload): Promise<string> => {
-  const response = await payinApi.post('/create_payment_links', payload, {
-    httpsAgent,
-    headers: { 'Idempotency-Key': payload.transaction_id },
-  });
-  const link =
-    response.data?.data?.payment_link ||
-    response.data?.data?.link ||
-    response.data?.payment_link ||
-    response.data?.link;
+  try {
+    console.log('[Swychr] Creating payment link with payload:', JSON.stringify(payload));
+    const response = await payinApi.post('/create_payment_links', payload, {
+      httpsAgent,
+      headers: { 'Idempotency-Key': payload.transaction_id },
+    });
 
-  if (!link) throw new Error('Swychr did not return a payment link.');
-  return link;
+    console.log('[Swychr] create_payment_links response:', JSON.stringify(response.data));
+
+    const resData = response.data;
+    const link =
+      resData?.data?.payment_link ||
+      resData?.data?.link ||
+      resData?.data?.checkout_url ||
+      resData?.data?.payment_url ||
+      resData?.data?.url ||
+      resData?.payment_link ||
+      resData?.link ||
+      resData?.checkout_url ||
+      resData?.payment_url ||
+      resData?.url;
+
+    if (!link) {
+      const errorMsg = resData?.message || resData?.error || resData?.data?.message || 'Swychr did not return a payment link.';
+      throw new Error(errorMsg);
+    }
+    return link;
+  } catch (error: any) {
+    const errorDetails = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+    console.error('[Swychr] createPaymentLink error:', errorDetails);
+    const msg = error.response?.data?.message || error.response?.data?.error || error.message;
+    throw new Error(msg);
+  }
 };
 
 /**
