@@ -30,14 +30,14 @@ export const PremiumBanner = ({ plan = 'basic', className = '' }: PremiumBannerP
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-slate-950 text-white px-2 py-0.5 rounded-md">
-                Growth Tier
+                GROWTH PLAN
               </span>
               <h4 className="text-xs sm:text-sm font-black text-slate-950">
-                Unlock Business Directory & Marketplace Selling
+                Only Pay When a Client Contacts You
               </h4>
             </div>
             <p className="text-[11px] sm:text-xs font-semibold text-slate-900/80 mt-0.5">
-              Upgrade to CPROHUB Premium to list your company publicly and sell materials directly to contractors.
+              Recharge your account and promote your construction business. Your balance is only deducted when a client contacts you.
             </p>
           </div>
         </div>

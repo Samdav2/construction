@@ -249,6 +249,33 @@ export default function CproHubLanding() {
                 </button>
               </div>
 
+              {/* Growth Plan Tier Section */}
+              <div className="w-full max-w-xl p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-[#FFC107] via-[#F59E0B] to-[#D97706] text-slate-950 shadow-xl border border-amber-400/40 text-left mt-2 mb-3 select-none">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-black uppercase tracking-wider bg-slate-950 text-white px-2 py-0.5 rounded-md">
+                        GROWTH PLAN
+                      </span>
+                      <h4 className="text-xs sm:text-sm font-black text-slate-950">
+                        Only Pay When a Client Contacts You
+                      </h4>
+                    </div>
+                    <p className="text-[11px] sm:text-xs font-semibold text-slate-950/85 leading-relaxed">
+                      Recharge your account and promote your construction business. Your balance is only deducted when a client contacts you.
+                    </p>
+                  </div>
+
+                  <Link
+                    to="/register"
+                    className="shrink-0 bg-slate-950 hover:bg-slate-900 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <span>Upgrade to Premium</span>
+                    <ArrowRight size={13} strokeWidth={2.5} />
+                  </Link>
+                </div>
+              </div>
+
               <p className="text-[10px] sm:text-xs text-slate-300 font-medium text-center lg:text-left max-w-md mx-auto lg:mx-0">
                 The core services are 100% free. The only cost is a marketplace commission when you make a sale.
               </p>
