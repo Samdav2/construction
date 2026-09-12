@@ -79,7 +79,15 @@ const DirectoryLeads = () => {
     queryFn: async () => (await apiClient.get('/auth/company/profile')).data,
   });
 
-  const isPremium = company?.plan === 'pro' || company?.plan === 'enterprise';
+  const { data: walletData } = useQuery({
+    queryKey: ['wallet-balance'],
+    queryFn: async () => (await apiClient.get('/wallet/balance')).data,
+    staleTime: 30000,
+  });
+
+  const walletBalance = Number(walletData?.balance || 0);
+  const hasWalletAccess = walletBalance >= 10;
+  const isPremium = company?.plan === 'pro' || company?.plan === 'enterprise' || hasWalletAccess;
 
   useEffect(() => {
     if (!companyLoading && company) {
@@ -150,7 +158,7 @@ const DirectoryLeads = () => {
               <div>
                 <h4 className="font-black text-lg text-white">Public Directory Listing is a Premium Feature</h4>
                 <p className="text-xs text-slate-300 font-medium mt-1 leading-relaxed">
-                  Upgrade your workspace to CPROHUB Premium to publish your business profile in search results, appear on client quote discovery, and receive direct project inquiries.
+                  Upgrade your workspace to CPROHUB Premium or maintain a minimum wallet balance of $10 to publish your business profile in search results, appear on client quote discovery, and receive direct project inquiries.
                 </p>
               </div>
             </div>

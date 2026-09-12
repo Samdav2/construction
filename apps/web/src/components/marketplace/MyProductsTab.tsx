@@ -37,7 +37,15 @@ export const MyProductsTab = () => {
     queryFn: async () => (await apiClient.get('/auth/company/profile')).data,
   });
 
-  const isPremium = company?.plan === 'pro' || company?.plan === 'enterprise';
+  const { data: walletData } = useQuery({
+    queryKey: ['wallet-balance'],
+    queryFn: async () => (await apiClient.get('/wallet/balance')).data,
+    staleTime: 30000,
+  });
+
+  const walletBalance = Number(walletData?.balance || 0);
+  const hasWalletAccess = walletBalance >= 10;
+  const isPremium = company?.plan === 'pro' || company?.plan === 'enterprise' || hasWalletAccess;
 
   // Fetch My Products
   const { data: myProducts = [], isLoading } = useQuery({
@@ -180,7 +188,7 @@ export const MyProductsTab = () => {
             </div>
             <div>
               <h4 className="font-black text-base text-white">Marketplace Selling is a Premium Feature</h4>
-              <p className="text-xs text-slate-300 font-medium mt-0.5">Upgrade your account to list building materials, manage inventory, and receive contractor orders.</p>
+              <p className="text-xs text-slate-300 font-medium mt-0.5">Upgrade your account or maintain at least $10 in your wallet to list building materials, manage inventory, and receive contractor orders.</p>
             </div>
           </div>
           <button

@@ -76,9 +76,18 @@ const BusinessSettings = () => {
     enabled: !!user,
   });
 
+  const { data: walletData } = useQuery({
+    queryKey: ['wallet-balance'],
+    queryFn: async () => (await apiClient.get('/wallet/balance')).data,
+    enabled: user?.role === 'owner',
+    staleTime: 30000,
+  });
+
+  const walletBalance = Number(walletData?.balance || 0);
+  const hasWalletAccess = walletBalance >= 10;
   const companySlug = company?.slug ?? user?.slug ?? getPersistedSlug();
   const plan = company?.plan || (user as any)?.plan || 'basic';
-  const isPremium = plan === 'pro' || plan === 'enterprise';
+  const isPremium = plan === 'pro' || plan === 'enterprise' || hasWalletAccess;
 
   const effectiveFormData = {
     name: formData.name !== undefined ? formData.name : company?.name ?? '',
@@ -157,7 +166,7 @@ const BusinessSettings = () => {
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Workspace Tier</p>
-              <p className="text-xs font-black text-foreground">{isPremium ? '⭐ CPROHUB Premium' : 'Free Basic Plan'}</p>
+              <p className="text-xs font-black text-foreground">{isPremium ? (hasWalletAccess && plan === 'basic' ? '⭐ Pro Access (Wallet $10+)' : '⭐ CPROHUB Premium') : 'Free Basic Plan'}</p>
             </div>
             {!isPremium && (
               <button

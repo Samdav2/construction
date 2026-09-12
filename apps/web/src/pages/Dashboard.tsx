@@ -155,10 +155,7 @@ const Dashboard = () => {
     enabled: !!user,
   });
 
-  const plan = company?.plan || (user as any)?.plan || 'basic';
-  const isPremium = plan === 'pro' || plan === 'enterprise';
-
-  // Fetch wallet balance for display only
+  // Fetch wallet balance
   const { data: walletData, isLoading: walletLoading } = useQuery({
     queryKey: ['wallet-balance'],
     queryFn: async () => (await apiClient.get('/wallet/balance')).data,
@@ -173,6 +170,10 @@ const Dashboard = () => {
     }
     return null;
   }, [walletData, walletLoading]);
+
+  const plan = company?.plan || (user as any)?.plan || 'basic';
+  const hasWalletAccess = balance !== null && balance >= 10;
+  const isPremium = plan === 'pro' || plan === 'enterprise' || hasWalletAccess;
 
   const formattedBalance = useMemo(() => {
     if (balance !== null && format) {
@@ -221,7 +222,7 @@ const Dashboard = () => {
               <span>{company?.name || user?.company || 'Cprohub Workspace'}</span>
               <span>•</span>
               <span className={isPremium ? 'text-[#FFC107] font-black' : 'text-muted-foreground'}>
-                {isPremium ? '⭐ Premium Plan' : 'Basic Plan'}
+                {isPremium ? (hasWalletAccess && plan === 'basic' ? '⭐ Pro Access (Wallet $10+)' : '⭐ Premium Plan') : 'Basic Plan'}
               </span>
             </p>
           </motion.div>
@@ -291,7 +292,7 @@ const Dashboard = () => {
             onLockedClick={() => setPremiumModalConfig({
               open: true,
               title: 'Business Directory Lead Generation',
-              desc: 'Upgrade to CPROHUB Premium to publish your profile in the public directory and receive direct project leads.'
+              desc: 'Upgrade to CPROHUB Premium or maintain at least $10 in your wallet to publish your profile in the public directory and receive direct project leads.'
             })}
           />
 
@@ -307,16 +308,24 @@ const Dashboard = () => {
             onLockedClick={() => setPremiumModalConfig({
               open: true,
               title: 'Marketplace Material Seller',
-              desc: 'Upgrade to CPROHUB Premium to list and sell construction materials and heavy machinery directly to contractors.'
+              desc: 'Upgrade to CPROHUB Premium or maintain at least $10 in your wallet to list and sell construction materials and heavy machinery directly to contractors.'
             })}
           />
 
+          {/* Scraper / Opportunities (Premium Gated) */}
           <DashboardCard
             icon={Radar}
             title="Scraper"
             desc="Discover new leads and business tenders."
             path="/dashboard/opportunities"
             delay={0.15}
+            isPremiumOnly={true}
+            isUserPremium={isPremium}
+            onLockedClick={() => setPremiumModalConfig({
+              open: true,
+              title: 'Lead & Tender Scraper',
+              desc: 'Upgrade to CPROHUB Premium or maintain at least $10 in your wallet to discover new leads and scraped tenders.'
+            })}
           />
 
           <DashboardCard

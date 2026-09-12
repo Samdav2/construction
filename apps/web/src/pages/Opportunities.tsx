@@ -8,8 +8,9 @@ import { useCurrencyStore } from '../store/useCurrencyStore';
 import { useAuthStore } from '../store/useAuthStore';
 import {
   Radar, Search, MapPin, Calendar, Building2, RefreshCw, Loader2,
-  ExternalLink, Mail, Briefcase, Landmark, Target,
+  ExternalLink, Mail, Briefcase, Landmark, Target, Zap, Lock,
 } from 'lucide-react';
+import { PremiumModal } from '../components/dashboard/PremiumModal';
 
 interface Opportunity {
   _id: string;
@@ -211,6 +212,27 @@ const Opportunities = () => {
   const isOwner = user?.role === 'owner';
   const qc = useQueryClient();
 
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+
+  // Check subscription plan & wallet balance
+  const { data: company } = useQuery({
+    queryKey: ['company-profile'],
+    queryFn: async () => (await apiClient.get('/auth/company/profile')).data,
+    enabled: !!user,
+  });
+
+  const { data: walletData } = useQuery({
+    queryKey: ['wallet-balance'],
+    queryFn: async () => (await apiClient.get('/wallet/balance')).data,
+    enabled: isOwner,
+    staleTime: 30000,
+  });
+
+  const plan = company?.plan || (user as any)?.plan || 'basic';
+  const walletBalance = Number(walletData?.balance || 0);
+  const hasWalletAccess = walletBalance >= 10;
+  const isPremium = plan === 'pro' || plan === 'enterprise' || hasWalletAccess;
+
   // Filter inputs
   const [searchInput, setSearchInput] = useState('');
   const [q, setQ] = useState('');
@@ -279,13 +301,23 @@ const Opportunities = () => {
           </div>
           {isOwner && (
             <button
-              onClick={() => ingest.mutate()}
+              onClick={() => {
+                if (!isPremium) {
+                  setShowPremiumModal(true);
+                  return;
+                }
+                ingest.mutate();
+              }}
               disabled={ingest.isPending}
               className={`${t.btnPrimary} inline-flex items-center gap-2 disabled:opacity-60`}
             >
               {ingest.isPending ? (
                 <>
                   <Loader2 size={15} className="animate-spin" /> Refreshing…
+                </>
+              ) : !isPremium ? (
+                <>
+                  <Lock size={15} /> Refresh (Pro)
                 </>
               ) : (
                 <>
@@ -295,6 +327,29 @@ const Opportunities = () => {
             </button>
           )}
         </header>
+
+        {/* PRO / WALLET ACCESS BANNER */}
+        {!isPremium && (
+          <div className="mb-8 bg-[#071426] border border-white/15 rounded-3xl p-6 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#FFC107]/20 text-[#FFC107] flex items-center justify-center shrink-0">
+                <Zap size={24} className="fill-[#FFC107]" />
+              </div>
+              <div>
+                <h4 className="font-black text-lg text-white">Lead &amp; Tender Scraper is a Pro Feature</h4>
+                <p className="text-xs text-slate-300 font-medium mt-1 leading-relaxed">
+                  Upgrade your workspace to CPROHUB Premium or maintain a minimum wallet balance of $10 to access live scraped tenders, contract leads, and automated business opportunities.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowPremiumModal(true)}
+              className="w-full md:w-auto px-6 py-3 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-yellow-500/20 shrink-0 transition-all cursor-pointer"
+            >
+              Upgrade to Premium
+            </button>
+          </div>
+        )}
 
         {/* KPI STRIP */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -389,6 +444,13 @@ const Opportunities = () => {
           </>
         )}
       </div>
+
+      <PremiumModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+        featureTitle="Lead & Tender Scraper"
+        featureDesc="Upgrade to CPROHUB Premium or maintain at least $10 in your wallet to discover new leads and scraped tenders."
+      />
     </DashboardShell>
   );
 };

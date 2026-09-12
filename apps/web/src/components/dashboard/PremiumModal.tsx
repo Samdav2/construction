@@ -14,8 +14,11 @@ import {
   ExternalLink,
   CheckCircle2,
   Lock,
-  Globe
+  Globe,
+  Radar,
+  Wallet
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../../api/client';
 import toast from 'react-hot-toast';
@@ -46,6 +49,7 @@ export const PremiumModal = ({
   featureTitle = 'CPROHUB Premium',
   featureDesc = 'Upgrade your workspace to access premium business directory and marketplace selling features.'
 }: PremiumModalProps) => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [step, setStep] = useState<'overview' | 'checkout' | 'verifying'>('overview');
   const [selectedCountry, setSelectedCountry] = useState('CM');
@@ -219,6 +223,16 @@ export const PremiumModal = ({
                   </div>
 
                   <div className="flex items-start gap-3 border-t border-white/10 pt-3">
+                    <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
+                      <Radar size={16} />
+                    </div>
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-black text-white">Lead &amp; Tender Scraper</h4>
+                      <p className="text-[11px] text-slate-300">Scrape live project tenders, contractor opportunities, and construction jobs.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 border-t border-white/10 pt-3">
                     <div className="w-8 h-8 rounded-xl bg-[#FFC107]/20 text-[#FFC107] flex items-center justify-center shrink-0">
                       <ShieldCheck size={16} />
                     </div>
@@ -227,6 +241,29 @@ export const PremiumModal = ({
                       <p className="text-[11px] text-slate-300">Stand out with verified contractor credentials on all project bids.</p>
                     </div>
                   </div>
+                </div>
+
+                {/* Wallet $10+ alternative access box */}
+                <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 mb-5 gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                      <Wallet size={16} />
+                    </div>
+                    <div className="min-w-0">
+                      <h5 className="text-xs font-black text-white">Wallet Access ($10+)</h5>
+                      <p className="text-[10px] text-emerald-200/80 leading-tight">Maintain $10+ in your wallet to unlock all Pro features automatically.</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleClose();
+                      navigate('/dashboard/wallet');
+                    }}
+                    className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer"
+                  >
+                    Top Up
+                  </button>
                 </div>
 
                 {/* Pricing summary */}
