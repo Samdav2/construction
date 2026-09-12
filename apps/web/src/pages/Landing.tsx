@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Calculator, Search, MapPin, ShieldCheck, Award, Tag, Smile,
-  Star, ChevronRight, Menu, FileText, Users, ShoppingCart
+  Star, ChevronRight, FileText, Users, ShoppingCart
 } from 'lucide-react';
 import { PublicFooter } from '../components/layout/PublicFooter';
 import { PublicBottomNav } from '../components/layout/PublicBottomNav';
@@ -49,13 +49,6 @@ export default function Landing() {
             <span className="font-black text-lg tracking-tight uppercase text-brand-navy">Cpromark</span>
           </Link>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            {/* Right Hamburger */}
-            <button className="text-brand-navy p-1 cursor-pointer">
-              <Menu size={23} />
-            </button>
-          </div>
         </div>
       </nav>
 

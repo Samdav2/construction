@@ -152,8 +152,8 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
 
   const isInstallable = !isStandalone;
   const isCpromarkLanding = location.pathname === '/';
-  const appName = isCpromarkLanding ? 'Cpromark' : 'CproHub';
-  const appLogo = isCpromarkLanding ? '/cpromark-logo.png' : '/cprohub-logo.jpeg';
+  const appName = isCpromarkLanding ? 'Cpromark' : 'Cpro Hub';
+  const appLogo = isCpromarkLanding ? '/cpromark-logo.png' : '/cprohub-logo.png';
 
   return (
     <PWAContext.Provider

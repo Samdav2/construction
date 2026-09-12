@@ -188,11 +188,11 @@ export const PremiumModal = ({
                   <span>Premium Plan • ${monthlyFee}/mo</span>
                 </div>
 
-                <h3 className="text-2xl sm:text-3xl font-black tracking-tight mb-2 text-white">
+                <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-2 text-white break-words">
                   {featureTitle}
                 </h3>
 
-                <p className="text-slate-300 text-xs sm:text-sm font-medium leading-relaxed mb-6">
+                <p className="text-slate-300 text-xs sm:text-sm font-medium leading-relaxed mb-6 break-words">
                   {featureDesc}
                 </p>
 

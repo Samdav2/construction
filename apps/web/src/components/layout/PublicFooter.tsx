@@ -7,8 +7,8 @@ export const PublicFooter = () => (
       {/* Top part: Logo & Description / Tagline */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div className="flex items-center gap-2">
-          <img src="/cpromark-logo.png" alt="Cprohub Logo" className="w-8 h-8 object-contain rounded-lg" />
-          <span className="font-black text-foreground text-base">Cprohub</span>
+          <img src="/cprohub-logo.png" alt="Cpro Hub Logo" className="w-8 h-8 object-contain rounded-lg" />
+          <span className="font-black text-foreground text-base">Cpro Hub</span>
         </div>
         <p className="text-foreground/45 text-xs sm:text-sm font-semibold leading-relaxed max-w-md sm:text-right">
           The all-in-one platform for Africa's construction industry.

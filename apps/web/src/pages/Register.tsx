@@ -30,8 +30,8 @@ const Register = () => {
     name: '',
     email: '',
     password: '',
-    countryCode: 'CM',
-    country: 'Cameroon',
+    countryCode: 'US',
+    country: 'United States',
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -76,14 +76,13 @@ const Register = () => {
           <div className="relative z-10">
             {/* Logo */}
             <div className="mb-10 flex items-center gap-3">
-              <div className="flex items-end gap-1 h-7">
-                <span className="w-1.5 h-3 bg-[#FFC107] rounded-xs" />
-                <span className="w-1.5 h-4.5 bg-[#FFC107] rounded-xs" />
-                <span className="w-1.5 h-6 bg-[#FFC107] rounded-xs" />
-                <span className="w-1.5 h-7.5 bg-[#FFC107] rounded-xs" />
-              </div>
+              <img
+                src="/cprohub-logo.png"
+                alt="Cpro Hub Logo"
+                className="w-10 h-10 object-contain rounded-xl bg-white p-1 shadow-md"
+              />
               <div className="flex flex-col">
-                <span className="text-xl font-black tracking-wider text-white">CPROHUB</span>
+                <span className="text-xl font-black tracking-wider text-white">Cpro Hub</span>
                 <span className="text-[9px] font-bold tracking-widest text-slate-400 uppercase -mt-0.5">
                   Build · Manage · Grow
                 </span>
