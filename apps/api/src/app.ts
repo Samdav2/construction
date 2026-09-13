@@ -136,8 +136,8 @@ const possibleDistPaths = [
 for (const distPath of possibleDistPaths) {
   if (fs.existsSync(path.join(distPath, 'index.html'))) {
     app.use(express.static(distPath));
-    app.get('*', (req, res, next) => {
-      if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
+    app.use((req, res, next) => {
+      if (req.method !== 'GET' || req.path.startsWith('/api') || req.path.startsWith('/health')) {
         return next();
       }
       res.sendFile(path.join(distPath, 'index.html'));

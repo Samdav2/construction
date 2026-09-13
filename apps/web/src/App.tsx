@@ -99,6 +99,14 @@ function App() {
     return '/dashboard';
   };
 
+  // Determine landing page based on domain name or VITE_DEFAULT_LANDING env variable
+  const isCproHubDomain =
+    (typeof window !== 'undefined' && (
+      window.location.hostname.toLowerCase().includes('cprohub') ||
+      window.location.search.includes('view=cprohub')
+    )) ||
+    import.meta.env.VITE_DEFAULT_LANDING === 'cprohub';
+
   return (
     <Router>
       <PWAProvider>
@@ -121,7 +129,15 @@ function App() {
           <Route path="/worker/home" element={<WorkerHome />} />
 
           {/* ── GUEST ROUTES ── */}
-          <Route path="/" element={isAuthenticated ? <Navigate to={getHomePath()} /> : <Landing />} />
+          <Route path="/" element={
+            isAuthenticated ? (
+              <Navigate to={getHomePath()} />
+            ) : isCproHubDomain ? (
+              <CproHubLanding />
+            ) : (
+              <Landing />
+            )
+          } />
           <Route path="/login" element={isAuthenticated ? <Navigate to={getHomePath()} /> : <Login />} />
           <Route path="/register" element={isAuthenticated ? <Navigate to={getHomePath()} /> : <Register />} />
           <Route path="/directory" element={<PublicDirectory />} />
@@ -131,6 +147,7 @@ function App() {
           <Route path="/company/:id" element={<PublicCompanyProfile />} />
           <Route path="/post-project" element={<PublicPostTender />} />
           <Route path="/cprohub" element={<CproHubLanding />} />
+          <Route path="/cpromark" element={<Landing />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
 

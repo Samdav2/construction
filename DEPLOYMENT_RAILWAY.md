@@ -105,6 +105,37 @@ If you prefer to run both the frontend and backend inside a single Railway servi
 
 ---
 
+## 🌐 Multi-Domain Setup: Cpromark vs Cpro Hub
+
+You can easily serve the **Cpro Hub** landing page for one domain (e.g. `cprohub.com`) and the **Cpromark** landing page for another (e.g. `cpromark.com`).
+
+### Method A: Single Deployment, Multiple Domains (Zero Extra Cost)
+The web application automatically detects the domain name visiting your site:
+- Any domain containing `cprohub` (e.g., `cprohub.com`, `www.cprohub.com`, `cprohub.up.railway.app`) will automatically show the **Cpro Hub** landing page at `/`.
+- All other domains (e.g., `cpromark.com`, default Railway domain) will show the **Cpromark** landing page at `/`.
+
+**To set this up on Railway:**
+1. Go to your `cprohub-web` service on Railway.
+2. Go to **Settings** → **Networking** → **Custom Domain**.
+3. Add your first domain (e.g. `cpromark.com`).
+4. Click **Custom Domain** again and add your second domain (e.g. `cprohub.com`).
+5. In your DNS provider (Cloudflare, Namecheap, GoDaddy, etc.), add the CNAME records provided by Railway.
+
+### Method B: Separate Service with Environment Variable
+If you want an isolated web service dedicated to the second domain:
+1. In your Railway project, create a new service from the GitHub repo.
+2. Set **Root Directory** to `/apps/web`.
+3. In **Variables**, add:
+   ```env
+   VITE_DEFAULT_LANDING=cprohub
+   VITE_API_URL=https://<your-api-service>.up.railway.app/api/v1
+   VITE_SOCKET_URL=https://<your-api-service>.up.railway.app
+   ```
+4. Attach your custom domain under **Settings** → **Networking**.
+5. When `VITE_DEFAULT_LANDING=cprohub` is set, `/` will always render the Cpro Hub landing page.
+
+---
+
 ## 🔍 Verification & Health Checks
 
 1. **API Health**:

@@ -6,6 +6,7 @@
     "apps/*"
   ],
   "scripts": {
+    "install:all": "npm --prefix apps/web install && npm --prefix apps/api install",
     "build:api": "npm --prefix apps/api run build",
     "build:web": "npm --prefix apps/web run build",
     "build": "npm --prefix apps/web run build && npm --prefix apps/api run build",
