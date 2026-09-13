@@ -3,8 +3,8 @@ nixPkgs = ["nodejs_20"]
 
 [phases.install]
 cmds = [
-  "npm --prefix apps/web install",
-  "npm --prefix apps/api install"
+  "npm --prefix apps/web install --include=dev",
+  "npm --prefix apps/api install --include=dev"
 ]
 
 [phases.build]
@@ -15,4 +15,3 @@ cmds = [
 
 [start]
 cmd = "node apps/api/dist/server.js"
-
