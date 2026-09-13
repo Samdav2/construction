@@ -125,26 +125,42 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'BuildHub API Engine is healthy', timestamp: new Date() });
 });
 
-// 5. PRODUCTION STATIC CLIENT SERVING (For Unified Monorepo / Single-Service Deployment)
-const possibleDistPaths = [
-  path.resolve(__dirname, '../../web/dist'),
-  path.resolve(__dirname, '../../../apps/web/dist'),
-  path.resolve(process.cwd(), 'apps/web/dist'),
-  path.resolve(process.cwd(), 'dist')
-];
+// 5. PRODUCTION STATIC CLIENT SERVING (Only when explicitly enabled via SERVE_FRONTEND=true)
+const shouldServeFrontend = process.env.SERVE_FRONTEND === 'true';
 
-for (const distPath of possibleDistPaths) {
-  if (fs.existsSync(path.join(distPath, 'index.html'))) {
-    app.use(express.static(distPath));
-    app.use((req, res, next) => {
-      if (req.method !== 'GET' || req.path.startsWith('/api') || req.path.startsWith('/health')) {
-        return next();
-      }
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-    break;
+if (shouldServeFrontend) {
+  const possibleDistPaths = [
+    path.resolve(__dirname, '../../web/dist'),
+    path.resolve(__dirname, '../../../apps/web/dist'),
+    path.resolve(process.cwd(), 'apps/web/dist'),
+    path.resolve(process.cwd(), 'dist')
+  ];
+
+  for (const distPath of possibleDistPaths) {
+    if (fs.existsSync(path.join(distPath, 'index.html'))) {
+      app.use(express.static(distPath));
+      app.use((req, res, next) => {
+        if (req.method !== 'GET' || req.path.startsWith('/api') || req.path.startsWith('/health')) {
+          return next();
+        }
+        res.sendFile(path.join(distPath, 'index.html'));
+      });
+      break;
+    }
   }
 }
+
+// 6. DEFAULT API ROOT ROUTE
+app.get('/', (req, res) => {
+  res.status(200).json({
+    service: 'Cpro Hub / BuildHub API Engine',
+    status: 'online',
+    version: '4.0.0',
+    health: '/health',
+    endpoints: '/api/v1',
+    timestamp: new Date()
+  });
+});
 
 app.use(errorHandler);
 
