@@ -120,9 +120,63 @@ app.use('/api/v1/worker', workerAuthRoutes);
 app.use('/api/v1/receipts', receiptRoutes);
 app.use('/api/v1/community', communityRoutes);
 
-// 4. HEALTH CHECK ROUTE
+// 4. API STATUS & HEALTH CHECK ROUTES
+app.get(['/api', '/api/v1'], (req, res) => {
+  res.status(200).json({
+    success: true,
+    service: 'Cpro Hub / BuildHub API Engine',
+    version: '4.0.0',
+    status: 'online',
+    health: '/health',
+    message: 'Welcome to Cpro Hub / BuildHub API v1. Use the endpoints below to interact with the platform.',
+    endpoints: {
+      auth: '/api/v1/auth',
+      projects: '/api/v1/projects',
+      invoices: '/api/v1/invoices',
+      marketplace: '/api/v1/marketplace',
+      workforce: '/api/v1/workforce',
+      boq: '/api/v1/boq',
+      tenders: '/api/v1/tenders',
+      messages: '/api/v1/messages',
+      admin: '/api/v1/admin',
+      superadmin: '/api/v1/superadmin',
+      explore: '/api/v1/explore',
+      inquiries: '/api/v1/inquiries',
+      documents: '/api/v1/documents',
+      ai: '/api/v1/ai',
+      services: '/api/v1/services',
+      wallet: '/api/v1/wallet',
+      fx: '/api/v1/fx',
+      analytics: '/api/v1/analytics',
+      opportunities: '/api/v1/opportunities',
+      attendance: '/api/v1/attendance',
+      payroll: '/api/v1/payroll',
+      tasks: '/api/v1/tasks',
+      worker: '/api/v1/worker',
+      receipts: '/api/v1/receipts',
+      community: '/api/v1/community'
+    },
+    timestamp: new Date()
+  });
+});
+
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'BuildHub API Engine is healthy', timestamp: new Date() });
+  res.status(200).json({ 
+    status: 'BuildHub API Engine is healthy', 
+    service: 'cprohub-api',
+    timestamp: new Date() 
+  });
+});
+
+// Catch-all for unhandled API routes — ALWAYS return JSON, NEVER return HTML
+app.use('/api', (req, res) => {
+  res.status(404).json({
+    success: false,
+    error: 'API endpoint not found',
+    path: req.originalUrl,
+    method: req.method,
+    timestamp: new Date()
+  });
 });
 
 // 5. PRODUCTION STATIC CLIENT SERVING (Only when explicitly enabled via SERVE_FRONTEND=true)
@@ -138,7 +192,7 @@ if (shouldServeFrontend) {
 
   for (const distPath of possibleDistPaths) {
     if (fs.existsSync(path.join(distPath, 'index.html'))) {
-      app.use(express.static(distPath));
+      app.use(express.static(distPath, { index: false }));
       app.use((req, res, next) => {
         if (req.method !== 'GET' || req.path.startsWith('/api') || req.path.startsWith('/health')) {
           return next();
@@ -157,8 +211,18 @@ app.get('/', (req, res) => {
     status: 'online',
     version: '4.0.0',
     health: '/health',
-    endpoints: '/api/v1',
+    api: '/api/v1',
     timestamp: new Date()
+  });
+});
+
+// 7. GLOBAL 404 HANDLER FOR UNMATCHED ROUTES (Always JSON)
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    error: 'Resource not found',
+    path: req.originalUrl,
+    method: req.method
   });
 });
 

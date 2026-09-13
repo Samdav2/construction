@@ -35,7 +35,7 @@ export default defineConfig({
         // Precache the app shell; API calls (cross-origin :5050) stay network-only.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//],
+        navigateFallbackDenylist: [/^\/api/, /^\/health/],
         cleanupOutdatedCaches: true,
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
