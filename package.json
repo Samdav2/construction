@@ -1,0 +1,22 @@
+{
+  "name": "construction-platform",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "build:api": "npm --prefix apps/api run build",
+    "build:web": "npm --prefix apps/web run build",
+    "build": "npm --prefix apps/web run build && npm --prefix apps/api run build",
+    "start:api": "npm --prefix apps/api start",
+    "start:web": "npm --prefix apps/web start",
+    "start": "node apps/api/dist/server.js",
+    "dev:api": "npm --prefix apps/api run dev",
+    "dev:web": "npm --prefix apps/web run dev"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
+

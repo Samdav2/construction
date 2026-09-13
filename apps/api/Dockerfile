@@ -1,19 +1,29 @@
-FROM node:20-alpine
+# Build stage
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-COPY yarn.lock ./
+COPY tsconfig.json ./
+RUN npm install
 
-# Install dependencies
-RUN yarn install --ignore-engines
+COPY src/ ./src/
+RUN npm run build
 
-# Copy source code
-COPY . .
+# Production runner stage
+FROM node:20-alpine AS runner
 
-# Expose port (your app uses 5000 or 8080)
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY package*.json ./
+RUN npm install --omit=dev
+
+COPY --from=builder /app/dist ./dist
+
+# Railway provides PORT env var at runtime (defaults to 5000)
+ENV PORT=5000
 EXPOSE 5000
 
-# Start the application
-CMD ["yarn", "start"]
+CMD ["node", "dist/server.js"]

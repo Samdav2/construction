@@ -11,23 +11,42 @@ import { backfillMissingCompanySlugs } from './utils/companySlug';
 const server = http.createServer(app);
 
 // 1. Socket.IO Setup
-const allowedSocketOrigins = [process.env.CLIENT_URL || 'http://localhost:5173'];
-const isLocalhostOrigin = (origin?: string | null) => {
-  if (!origin) return false;
+const isSocketOriginAllowed = (origin?: string | null): boolean => {
+  if (!origin) return true;
+
+  const staticOrigins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:4173",
+    "https://construction-ten-zeta.vercel.app",
+    "https://cpromark.com",
+    "https://www.cpromark.com",
+    "https://d1q5gtvb1a02hf.cloudfront.net",
+    "https://d12e8wwao0hlhx.cloudfront.net"
+  ];
+
+  if (process.env.CLIENT_URL) staticOrigins.push(process.env.CLIENT_URL);
+  if (process.env.FRONTEND_URL) staticOrigins.push(process.env.FRONTEND_URL);
+
+  if (staticOrigins.includes(origin)) return true;
+
   try {
     const u = new URL(origin);
-    return u.hostname === 'localhost' || u.hostname === '127.0.0.1';
+    if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') return true;
+    if (u.hostname.endsWith('.railway.app') || u.hostname.endsWith('.up.railway.app')) return true;
   } catch {
     return false;
   }
+
+  return false;
 };
 
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
-      // allow no-origin requests
-      if (!origin) return callback(null, true);
-      if (allowedSocketOrigins.indexOf(origin) !== -1 || isLocalhostOrigin(origin)) return callback(null, true);
+      if (isSocketOriginAllowed(origin)) {
+        return callback(null, true);
+      }
       return callback(new Error('Not allowed by CORS'));
     },
     methods: ['GET', 'POST', 'PUT', 'OPTIONS']

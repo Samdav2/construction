@@ -8,3 +8,16 @@ temp_interactive_push.bat
 package-lock.json
 **/package-lock.json
 *.zip
+
+# Environment & local secrets
+.env
+.env.local
+.env.*.local
+*.local
+
+# Build artifacts
+dist/
+dist-ssr/
+apps/api/dist/
+apps/web/dist/
+

@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
 
 // 1. ROUTE IMPORTS
 import authRoutes from './routes/authRoutes';
@@ -37,27 +39,47 @@ dotenv.config();
 const app = express();
 
 // 2. GLOBAL MIDDLEWARES
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://construction-ten-zeta.vercel.app",
-  "https://cpromark.com",
-  "https://www.cpromark.com",
-  "https://d1q5gtvb1a02hf.cloudfront.net",
-  "https://d12e8wwao0hlhx.cloudfront.net"
-];
+const isOriginAllowed = (origin?: string | null): boolean => {
+  if (!origin) return true;
+
+  const staticOrigins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:4173",
+    "https://construction-ten-zeta.vercel.app",
+    "https://cpromark.com",
+    "https://www.cpromark.com",
+    "https://d1q5gtvb1a02hf.cloudfront.net",
+    "https://d12e8wwao0hlhx.cloudfront.net"
+  ];
+
+  if (process.env.CLIENT_URL) staticOrigins.push(process.env.CLIENT_URL);
+  if (process.env.FRONTEND_URL) staticOrigins.push(process.env.FRONTEND_URL);
+
+  if (staticOrigins.includes(origin)) return true;
+
+  try {
+    const url = new URL(origin);
+    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return true;
+    if (url.hostname.endsWith('.railway.app') || url.hostname.endsWith('.up.railway.app')) return true;
+  } catch {
+    return false;
+  }
+
+  return false;
+};
 
 app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+    if (isOriginAllowed(origin)) {
+      return callback(null, true);
     }
-    return callback(null, true);
+    return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -102,6 +124,27 @@ app.use('/api/v1/community', communityRoutes);
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'BuildHub API Engine is healthy', timestamp: new Date() });
 });
+
+// 5. PRODUCTION STATIC CLIENT SERVING (For Unified Monorepo / Single-Service Deployment)
+const possibleDistPaths = [
+  path.resolve(__dirname, '../../web/dist'),
+  path.resolve(__dirname, '../../../apps/web/dist'),
+  path.resolve(process.cwd(), 'apps/web/dist'),
+  path.resolve(process.cwd(), 'dist')
+];
+
+for (const distPath of possibleDistPaths) {
+  if (fs.existsSync(path.join(distPath, 'index.html'))) {
+    app.use(express.static(distPath));
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
+        return next();
+      }
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+    break;
+  }
+}
 
 app.use(errorHandler);
 
