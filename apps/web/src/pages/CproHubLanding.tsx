@@ -49,11 +49,11 @@ export default function CproHubLanding() {
           <Link to="/cprohub" className="flex items-center gap-3 group">
             <img
               src="/cprohub-logo.png"
-              alt="Cpro Hub Logo"
+              alt="Cprohub Logo"
               className="w-9 h-9 object-contain rounded-xl bg-white p-0.5 shadow-sm"
             />
             <div className="flex flex-col">
-              <span className="text-xl font-extrabold tracking-wider text-white">Cpro Hub</span>
+              <span className="text-xl font-extrabold tracking-wider text-white">Cprohub</span>
               <span className="text-[9px] font-bold tracking-widest text-slate-400 uppercase -mt-0.5">
                 Build · Manage · Grow
               </span>
@@ -293,7 +293,7 @@ export default function CproHubLanding() {
                     <div className="flex items-center gap-1.5">
                       <img
                         src="/cprohub-logo.png"
-                        alt="Cpro Hub"
+                        alt="Cprohub"
                         className="w-4.5 h-4.5 object-contain rounded-xs"
                       />
                       <span className="text-xs font-black tracking-wider text-slate-950">CPROHUB</span>
@@ -809,11 +809,11 @@ export default function CproHubLanding() {
               <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
                 <img
                   src="/cprohub-logo.png"
-                  alt="Cpro Hub Logo"
+                  alt="Cprohub Logo"
                   className="w-9 h-9 object-contain rounded-xl bg-white p-0.5 shadow-sm"
                 />
                 <div className="flex flex-col text-left">
-                  <span className="text-xl font-black tracking-wider text-white">Cpro Hub</span>
+                  <span className="text-xl font-black tracking-wider text-white">Cprohub</span>
                   <span className="text-[9px] font-bold tracking-widest text-slate-400 uppercase -mt-0.5">
                     Build · Manage · Grow
                   </span>

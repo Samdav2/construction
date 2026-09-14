@@ -62,7 +62,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(port, '0.0.0.0', () => {
-  console.log(`🚀 [Web Server] Cpro Hub Web Frontend is live on port ${port}!`);
+  console.log(`🚀 [Web Server] Cprohub Web Frontend is live on port ${port}!`);
   console.log(`🌐 [Web Server] Serving production build from: ${distPath}`);
 });
 

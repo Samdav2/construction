@@ -164,7 +164,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
     import.meta.env.VITE_DEFAULT_LANDING === 'cprohub';
 
   const isCpromarkPage = location.pathname === '/cpromark' || (location.pathname === '/' && !isCproHub);
-  const appName = isCproHub ? 'Cpro Hub' : (isCpromarkPage ? 'Cpromark' : 'Cpro Hub');
+  const appName = isCproHub ? 'Cprohub' : (isCpromarkPage ? 'Cpromark' : 'Cprohub');
   const appLogo = isCproHub ? '/cprohub-logo.png' : (isCpromarkPage ? '/cpromark-logo.png' : '/cprohub-logo.png');
 
   return (

@@ -84,11 +84,11 @@ if (isWeb) {
   });
 
   server.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 [Launcher] Cpro Hub Web Frontend is live on port ${port}!`);
+    console.log(`🚀 [Launcher] Cprohub Web Frontend is live on port ${port}!`);
     console.log(`🌐 [Launcher] Serving production build from: ${distPath}`);
   });
 } else {
-  console.log('🚀 [Launcher] Starting Cpro Hub API Backend Engine...');
+  console.log('🚀 [Launcher] Starting Cprohub API Backend Engine...');
   require('./apps/api/dist/server.js');
 }
 

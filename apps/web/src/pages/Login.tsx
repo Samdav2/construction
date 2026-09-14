@@ -49,10 +49,10 @@ const Login = () => {
         <div className="text-center mb-10">
           <img 
             src="/cprohub-logo.png" 
-            alt="Cpro Hub" 
+            alt="Cprohub" 
             className="w-16 h-16 rounded-2xl shadow-xl object-contain bg-white p-1 mx-auto mb-6" 
           />
-          <h2 className="text-3xl font-black text-foreground mb-2 tracking-tighter">Welcome to Cpro Hub</h2>
+          <h2 className="text-3xl font-black text-foreground mb-2 tracking-tighter">Welcome to Cprohub</h2>
           <p className="text-foreground/40 text-sm font-medium">Access your professional workspace.</p>
         </div>
 

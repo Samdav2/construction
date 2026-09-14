@@ -123,8 +123,8 @@ export const Sidebar = ({ onNavigate }: { onNavigate?: () => void }) => {
         onClick={onNavigate}
         className="flex items-center gap-3 mb-8 px-2 hover:opacity-85 transition-opacity"
       >
-        <img src="/cprohub-logo.png" alt="Cpro Hub Logo" className="w-8 h-8 rounded-lg bg-white p-0.5 object-contain shadow-sm" />
-        <h2 className="text-lg font-black tracking-tighter text-foreground italic">Cpro Hub</h2>
+        <img src="/cprohub-logo.png" alt="Cprohub Logo" className="w-8 h-8 rounded-lg bg-white p-0.5 object-contain shadow-sm" />
+        <h2 className="text-lg font-black tracking-tighter text-foreground italic">Cprohub</h2>
       </Link>
 
       <nav className="flex-1">

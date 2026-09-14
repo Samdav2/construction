@@ -21,6 +21,7 @@ const isSocketOriginAllowed = (origin?: string | null): boolean => {
     "https://construction-ten-zeta.vercel.app",
     "https://cpromark.com",
     "https://www.cpromark.com",
+    "https://cprohub.cpromark.com",
     "https://d1q5gtvb1a02hf.cloudfront.net",
     "https://d12e8wwao0hlhx.cloudfront.net"
   ];
@@ -34,6 +35,8 @@ const isSocketOriginAllowed = (origin?: string | null): boolean => {
     const u = new URL(origin);
     if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') return true;
     if (u.hostname.endsWith('.railway.app') || u.hostname.endsWith('.up.railway.app')) return true;
+    if (u.hostname.endsWith('.cpromark.com') || u.hostname === 'cpromark.com') return true;
+    if (u.hostname.endsWith('.cprohub.com') || u.hostname === 'cprohub.com') return true;
   } catch {
     return false;
   }

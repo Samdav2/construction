@@ -78,11 +78,11 @@ const Register = () => {
             <div className="mb-10 flex items-center gap-3">
               <img
                 src="/cprohub-logo.png"
-                alt="Cpro Hub Logo"
+                alt="Cprohub Logo"
                 className="w-10 h-10 object-contain rounded-xl bg-white p-1 shadow-md"
               />
               <div className="flex flex-col">
-                <span className="text-xl font-black tracking-wider text-white">Cpro Hub</span>
+                <span className="text-xl font-black tracking-wider text-white">Cprohub</span>
                 <span className="text-[9px] font-bold tracking-widest text-slate-400 uppercase -mt-0.5">
                   Build · Manage · Grow
                 </span>
