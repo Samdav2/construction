@@ -100,11 +100,15 @@ function App() {
   };
 
   // Determine landing page based on domain name or VITE_DEFAULT_LANDING env variable
+  // Specifically matches cprohub.cpromark.com, cprohub.*, or any cprohub domain/view parameter
+  const hostname = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+  const search = typeof window !== 'undefined' ? window.location.search.toLowerCase() : '';
+
   const isCproHubDomain =
-    (typeof window !== 'undefined' && (
-      window.location.hostname.toLowerCase().includes('cprohub') ||
-      window.location.search.includes('view=cprohub')
-    )) ||
+    hostname === 'cprohub.cpromark.com' ||
+    hostname.startsWith('cprohub.') ||
+    hostname.includes('cprohub') ||
+    search.includes('view=cprohub') ||
     import.meta.env.VITE_DEFAULT_LANDING === 'cprohub';
 
   return (

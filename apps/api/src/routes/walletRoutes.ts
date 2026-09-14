@@ -224,6 +224,18 @@ router.get('/topup-verify/:txId', protect, async (req: any, res) => {
       { new: true }
     );
 
+    if (updated && (updated.walletBalance ?? 0) >= 10 && updated.plan !== 'enterprise') {
+      await Company.findByIdAndUpdate(company._id, {
+        plan: 'pro',
+        subscriptionPayment: {
+          plan: 'pro',
+          status: 'active',
+          paidAt: new Date(),
+          notes: 'Unlocked via wallet top-up ($10+ balance)'
+        }
+      });
+    }
+
     res.json({ status: 'success', balance: updated?.walletBalance ?? 0 });
   } catch (e: any) {
     console.error('[Wallet topup-verify]', e.message);
@@ -300,6 +312,17 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req: a
             date: new Date(),
           },
         ];
+
+        if (company.walletBalance >= 10 && company.plan !== 'enterprise') {
+          company.plan = 'pro';
+          company.subscriptionPayment = {
+            plan: 'pro',
+            status: 'active',
+            paidAt: new Date(),
+            notes: 'Unlocked via wallet top-up ($10+ balance)'
+          };
+        }
+
         await company.save();
       }
     }

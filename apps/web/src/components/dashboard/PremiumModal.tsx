@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Sparkles,
   X,
   Building2,
   Store,
@@ -46,12 +45,13 @@ const COUNTRIES = [
 export const PremiumModal = ({
   isOpen,
   onClose,
-  featureTitle = 'CPROHUB Premium',
-  featureDesc = 'Upgrade your workspace to access premium business directory and marketplace selling features.'
+  featureTitle = 'Recharge Account for Pro Access',
+  featureDesc
 }: PremiumModalProps) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [step, setStep] = useState<'overview' | 'checkout' | 'verifying'>('overview');
+  const [rechargeAmount, setRechargeAmount] = useState<number>(10);
   const [selectedCountry, setSelectedCountry] = useState('CM');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [activeTxId, setActiveTxId] = useState<string | null>(null);
@@ -69,33 +69,21 @@ export const PremiumModal = ({
     }
   }, [company]);
 
-  // Fetch admin configured subscription settings
-  const { data: config } = useQuery({
-    queryKey: ['subscription-config'],
+  // Live conversion estimation query based on selected recharge amount
+  const { data: conversion } = useQuery({
+    queryKey: ['premium-conversion', selectedCountry, rechargeAmount],
     queryFn: async () => {
-      const res = await apiClient.get('/auth/company/subscription-config');
+      const res = await apiClient.get(`/wallet/rate?amount=${rechargeAmount}&countryCode=${selectedCountry}`);
       return res.data;
     },
     enabled: isOpen
   });
 
-  const monthlyFee = config?.monthlyFee ?? 29;
-
-  // Live conversion estimation query
-  const { data: conversion } = useQuery({
-    queryKey: ['premium-conversion', selectedCountry, monthlyFee],
-    queryFn: async () => {
-      const res = await apiClient.get(`/wallet/rate?amount=${monthlyFee}&countryCode=${selectedCountry}`);
-      return res.data;
-    },
-    enabled: isOpen && step === 'checkout'
-  });
-
   // Verification query when activeTxId is set
   const { data: verifyData } = useQuery({
-    queryKey: ['premium-verify', activeTxId],
+    queryKey: ['wallet-topup-verify', activeTxId],
     queryFn: async () => {
-      const res = await apiClient.get(`/auth/company/subscribe-verify/${activeTxId}`);
+      const res = await apiClient.get(`/wallet/topup-verify/${activeTxId}`);
       return res.data;
     },
     refetchInterval: (q) => {
@@ -107,7 +95,8 @@ export const PremiumModal = ({
 
   useEffect(() => {
     if (verifyData?.status === 'success') {
-      toast.success('Successfully upgraded to CPROHUB Premium! 🚀');
+      toast.success('Account recharged! Pro features unlocked! 🚀');
+      queryClient.invalidateQueries({ queryKey: ['wallet-balance'] });
       queryClient.invalidateQueries({ queryKey: ['company-profile'] });
       queryClient.invalidateQueries({ queryKey: ['analytics-overview'] });
       setTimeout(() => {
@@ -116,17 +105,17 @@ export const PremiumModal = ({
     }
   }, [verifyData, queryClient]);
 
-  // Initiate Swychr Checkout Mutation
+  // Initiate Swychr Wallet Top-up Mutation
   const initiateMutation = useMutation({
-    mutationFn: async (payload: { countryCode: string; phoneNumber?: string }) => {
-      const res = await apiClient.post('/auth/company/subscribe-initiate', payload);
+    mutationFn: async (payload: { amountUSD: number; countryCode: string; phoneNumber?: string }) => {
+      const res = await apiClient.post('/wallet/topup-initiate', payload);
       return res.data;
     },
     onSuccess: (data) => {
       if (data?.paymentLink) {
         setActiveTxId(data.transactionId);
         setStep('verifying');
-        // Open Swychr hosted checkout in current window or new tab
+        // Open Swychr hosted checkout
         window.location.href = data.paymentLink;
       }
     },
@@ -142,7 +131,11 @@ export const PremiumModal = ({
   };
 
   const handleStartCheckout = () => {
-    initiateMutation.mutate({ countryCode: selectedCountry, phoneNumber: phoneNumber.trim() });
+    initiateMutation.mutate({
+      amountUSD: rechargeAmount,
+      countryCode: selectedCountry,
+      phoneNumber: phoneNumber.trim()
+    });
   };
 
   return (
@@ -166,9 +159,9 @@ export const PremiumModal = ({
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
             className="relative w-full max-w-lg bg-[#071426] text-white border border-white/20 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] rounded-[2.5rem] overflow-hidden p-6 sm:p-8 select-none max-h-[90vh] overflow-y-auto"
           >
-            {/* Top Glow */}
+            {/* Glow Highlights */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFC107]/15 blur-[80px] rounded-full pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-sky-500/10 blur-[80px] rounded-full pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none" />
 
             {/* Close Button */}
             <button
@@ -179,7 +172,7 @@ export const PremiumModal = ({
               <X size={18} />
             </button>
 
-            {/* Step 1: PERKS & PRICING OVERVIEW */}
+            {/* Step 1: RECHARGE OVERVIEW & PERKS */}
             {step === 'overview' && (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
@@ -187,21 +180,58 @@ export const PremiumModal = ({
                 exit={{ opacity: 0, x: 10 }}
               >
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 bg-[#FFC107]/20 border border-[#FFC107]/40 px-3 py-1 rounded-full text-[#FFC107] text-xs font-black uppercase tracking-wider mb-4">
-                  <Sparkles size={13} />
-                  <span>Premium Plan • ${monthlyFee}/mo</span>
+                <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 rounded-full text-emerald-400 text-xs font-black uppercase tracking-wider mb-4">
+                  <Wallet size={13} />
+                  <span>No Monthly Subscription • $10+ Recharge</span>
                 </div>
 
                 <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-2 text-white break-words">
                   {featureTitle}
                 </h3>
 
-                <p className="text-slate-300 text-xs sm:text-sm font-medium leading-relaxed mb-6 break-words">
-                  {featureDesc}
+                <p className="text-slate-300 text-xs sm:text-sm font-medium leading-relaxed mb-5 break-words">
+                  {featureDesc || 'This is not a recurring monthly subscription. Simply recharge your account with $10 or more to instantly unlock all Pro features. 100% of your deposit stays in your wallet and is only deducted as you use services.'}
                 </p>
 
+                {/* Amount Selection Box */}
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-5">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">
+                      Select Deposit Amount (USD)
+                    </span>
+                    <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                      $10 Minimum to Unlock Pro
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 mb-3">
+                    {[10, 25, 50, 100].map((amt) => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => setRechargeAmount(amt)}
+                        className={`py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+                          rechargeAmount === amt
+                            ? 'bg-[#FFC107] text-slate-950 border-[#FFC107] shadow-md shadow-yellow-500/20 scale-[1.02]'
+                            : 'bg-white/5 text-white border-white/10 hover:bg-white/10'
+                        }`}
+                      >
+                        ${amt}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-slate-300 pt-1 border-t border-white/5">
+                    <span>Deposit into Wallet:</span>
+                    <strong className="text-white font-black text-xs">
+                      ${rechargeAmount}.00 USD
+                      {conversion?.localAmount
+                        ? ` (≈ ${Number(conversion.localAmount).toLocaleString()} ${conversion.currency || 'XAF'})`
+                        : ''}
+                    </strong>
+                  </div>
+                </div>
+
                 {/* Feature Perks List */}
-                <div className="space-y-3 bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 mb-7">
+                <div className="space-y-3 bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 mb-5">
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
                       <Building2 size={16} />
@@ -243,46 +273,30 @@ export const PremiumModal = ({
                   </div>
                 </div>
 
-                {/* Wallet $10+ alternative access box */}
-                <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 mb-5 gap-3">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                      <Wallet size={16} />
-                    </div>
-                    <div className="min-w-0">
-                      <h5 className="text-xs font-black text-white">Wallet Access ($10+)</h5>
-                      <p className="text-[10px] text-emerald-200/80 leading-tight">Maintain $10+ in your wallet to unlock all Pro features automatically.</p>
-                    </div>
+                {/* No Monthly Subscription Clarification Box */}
+                <div className="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 mb-6">
+                  <div className="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <CheckCircle2 size={15} />
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleClose();
-                      navigate('/dashboard/wallet');
-                    }}
-                    className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer"
-                  >
-                    Top Up
-                  </button>
-                </div>
-
-                {/* Pricing summary */}
-                <div className="flex items-center justify-between bg-[#FFC107]/10 border border-[#FFC107]/30 rounded-2xl p-4 mb-6">
-                  <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-[#FFC107] block">Monthly Subscription</span>
-                    <span className="text-2xl font-black text-white">${monthlyFee} <span className="text-xs text-slate-300 font-normal">/ month</span></span>
+                  <div className="min-w-0">
+                    <h5 className="text-xs font-black text-white">Pay-As-You-Grow (Zero Monthly Fees)</h5>
+                    <p className="text-[10.5px] text-emerald-200/85 leading-relaxed mt-0.5">
+                      You are <strong>never charged recurring monthly fees</strong>. Your funds stay in your account and are only deducted when a client contacts you or when you transact. Maintain a $10+ balance to keep Pro active.
+                    </p>
                   </div>
-                  <span className="text-[11px] font-bold text-slate-300 bg-white/10 px-3 py-1 rounded-lg">Instant Activation</span>
                 </div>
 
                 {/* Actions */}
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     type="button"
-                    onClick={handleClose}
+                    onClick={() => {
+                      handleClose();
+                      navigate('/dashboard/finance');
+                    }}
                     className="order-2 sm:order-1 flex-1 py-3.5 bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer text-center"
                   >
-                    Maybe Later
+                    Go to Wallet
                   </button>
                   <button
                     type="button"
@@ -290,14 +304,14 @@ export const PremiumModal = ({
                     className="order-1 sm:order-2 flex-2 py-3.5 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-yellow-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Zap size={14} className="fill-slate-950" />
-                    <span>Proceed to Payment</span>
+                    <span>Recharge ${rechargeAmount} Now</span>
                     <ArrowRight size={14} />
                   </button>
                 </div>
               </motion.div>
             )}
 
-            {/* Step 2: SWYCHR INTEGRATED PAYMENT CHECKOUT */}
+            {/* Step 2: SWYCHR PAYMENT CHECKOUT */}
             {step === 'checkout' && (
               <motion.div
                 initial={{ opacity: 0, x: 10 }}
@@ -306,14 +320,14 @@ export const PremiumModal = ({
               >
                 <div className="flex items-center gap-2 text-slate-400 mb-4 cursor-pointer hover:text-white transition-colors" onClick={() => setStep('overview')}>
                   <ArrowLeft size={16} />
-                  <span className="text-xs font-bold uppercase tracking-wider">Back to Plan</span>
+                  <span className="text-xs font-bold uppercase tracking-wider">Back to Overview</span>
                 </div>
 
                 <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-1 text-white">
-                  Swychr Checkout (${monthlyFee}/mo)
+                  Recharge Account (${rechargeAmount} USD)
                 </h3>
                 <p className="text-slate-300 text-xs font-medium mb-5">
-                  Select your payment country to pay with Mobile Money (MTN / Orange), Bank Cards, or Transfer.
+                  Select your payment country and enter your Mobile Money (MTN / Orange) or Card phone number. Your deposit will be credited directly to your wallet.
                 </p>
 
                 {/* Country selector */}
@@ -352,20 +366,20 @@ export const PremiumModal = ({
                 {/* Converted Amount Summary Box */}
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 mb-6">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-slate-400 font-semibold">Standard Plan Fee:</span>
-                    <span className="text-xs font-black text-white">${monthlyFee}.00 USD</span>
+                    <span className="text-xs text-slate-400 font-semibold">Recharge Deposit:</span>
+                    <span className="text-xs font-black text-white">${rechargeAmount}.00 USD</span>
                   </div>
                   <div className="flex items-center justify-between pt-2 border-t border-white/10">
                     <span className="text-xs text-slate-300 font-bold">Estimated Local Total:</span>
                     <span className="text-base sm:text-lg font-black text-[#FFC107]">
                       {conversion?.localAmount
                         ? `${Number(conversion.localAmount).toLocaleString()} ${conversion.currency || 'XAF'}`
-                        : `≈ ${(monthlyFee * 600).toLocaleString()} XAF`}
+                        : `≈ ${(rechargeAmount * 600).toLocaleString()} XAF`}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-3 pt-2 text-[10px] text-slate-400 border-t border-white/5">
                     <Lock size={11} className="text-emerald-400 shrink-0" />
-                    <span>Secure 256-bit encrypted checkout via Swychr / AccountPe.</span>
+                    <span>Secure 256-bit encrypted checkout via Swychr / AccountPe. Zero recurring fees.</span>
                   </div>
                 </div>
 
@@ -392,7 +406,7 @@ export const PremiumModal = ({
                     ) : (
                       <>
                         <CreditCard size={16} />
-                        <span>Pay with Swychr</span>
+                        <span>Pay ${rechargeAmount} with Swychr</span>
                         <ExternalLink size={13} />
                       </>
                     )}
@@ -417,12 +431,12 @@ export const PremiumModal = ({
                 </div>
 
                 <h3 className="text-xl font-black text-white mb-2">
-                  {verifyData?.status === 'success' ? 'Payment Confirmed! 🎉' : 'Awaiting Payment Confirmation'}
+                  {verifyData?.status === 'success' ? 'Recharge Confirmed! 🎉' : 'Awaiting Payment Confirmation'}
                 </h3>
                 <p className="text-slate-300 text-xs font-medium max-w-sm mx-auto mb-6">
                   {verifyData?.status === 'success'
-                    ? 'Your workspace has been upgraded to CPROHUB Premium.'
-                    : 'Complete your payment in the Swychr payment window. Once finished, this page will activate your Premium subscription automatically.'}
+                    ? `Your wallet has been credited with $${rechargeAmount} USD and all Pro features are now unlocked! There are no monthly subscription fees—your funds remain yours to use.`
+                    : 'Complete your payment in the Swychr window. Once finished, your wallet will be credited and Pro features will activate automatically.'}
                 </p>
 
                 <div className="flex gap-3 justify-center">
@@ -442,4 +456,3 @@ export const PremiumModal = ({
     </AnimatePresence>
   );
 };
-
