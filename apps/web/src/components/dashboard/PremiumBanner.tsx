@@ -47,7 +47,7 @@ export const PremiumBanner = ({ plan = 'basic', className = '' }: PremiumBannerP
             onClick={() => setModalOpen(true)}
             className="w-full sm:w-auto bg-slate-950 hover:bg-slate-900 text-white font-black text-xs px-5 py-3 rounded-xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            <span>Recharge Your Account</span>
+            <span>Upgrade To Premium</span>
             <ArrowRight size={13} strokeWidth={2.5} className="shrink-0" />
           </button>
         </div>
