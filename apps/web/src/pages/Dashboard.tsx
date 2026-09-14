@@ -291,8 +291,8 @@ const Dashboard = () => {
             isUserPremium={isPremium}
             onLockedClick={() => setPremiumModalConfig({
               open: true,
-              title: 'Business Directory Lead Generation',
-              desc: 'Upgrade to CPROHUB Premium or maintain at least $10 in your wallet to publish your profile in the public directory and receive direct project leads.'
+              title: 'Only Pay When a Client Contacts You',
+              desc: 'Recharge your account and promote your construction business. Your balance is only deducted when a client contacts you.'
             })}
           />
 
@@ -307,8 +307,8 @@ const Dashboard = () => {
             isUserPremium={isPremium}
             onLockedClick={() => setPremiumModalConfig({
               open: true,
-              title: 'Marketplace Material Seller',
-              desc: 'Upgrade to CPROHUB Premium or maintain at least $10 in your wallet to list and sell construction materials and heavy machinery directly to contractors.'
+              title: 'Only Pay When a Client Contacts You',
+              desc: 'Recharge your account and promote your construction business. Your balance is only deducted when a client contacts you.'
             })}
           />
 
@@ -323,8 +323,8 @@ const Dashboard = () => {
             isUserPremium={isPremium}
             onLockedClick={() => setPremiumModalConfig({
               open: true,
-              title: 'Lead & Tender Scraper',
-              desc: 'Upgrade to CPROHUB Premium or maintain at least $10 in your wallet to discover new leads and scraped tenders.'
+              title: 'Only Pay When a Client Contacts You',
+              desc: 'Recharge your account and promote your construction business. Your balance is only deducted when a client contacts you.'
             })}
           />
 

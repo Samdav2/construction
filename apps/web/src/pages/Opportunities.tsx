@@ -336,9 +336,9 @@ const Opportunities = () => {
                 <Zap size={24} className="fill-[#FFC107]" />
               </div>
               <div>
-                <h4 className="font-black text-lg text-white">Lead &amp; Tender Scraper is a Pro Feature</h4>
+                <h4 className="font-black text-lg text-white">Only Pay When a Client Contacts You</h4>
                 <p className="text-xs text-slate-300 font-medium mt-1 leading-relaxed">
-                  Upgrade your workspace to CPROHUB Premium or maintain a minimum wallet balance of $10 to access live scraped tenders, contract leads, and automated business opportunities.
+                  Recharge your account and promote your construction business. Maintain a minimum wallet balance of $10 to access live scraped tenders, contract leads, and automated business opportunities.
                 </p>
               </div>
             </div>
@@ -346,7 +346,7 @@ const Opportunities = () => {
               onClick={() => setShowPremiumModal(true)}
               className="w-full md:w-auto px-6 py-3 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-yellow-500/20 shrink-0 transition-all cursor-pointer"
             >
-              Upgrade to Premium
+              Recharge Account
             </button>
           </div>
         )}
@@ -448,8 +448,8 @@ const Opportunities = () => {
       <PremiumModal
         isOpen={showPremiumModal}
         onClose={() => setShowPremiumModal(false)}
-        featureTitle="Lead & Tender Scraper"
-        featureDesc="Upgrade to CPROHUB Premium or maintain at least $10 in your wallet to discover new leads and scraped tenders."
+        featureTitle="Only Pay When a Client Contacts You"
+        featureDesc="Recharge your account and promote your construction business. Your balance is only deducted when a client contacts you."
       />
     </DashboardShell>
   );

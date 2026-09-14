@@ -379,8 +379,8 @@ export const MyProductsTab = () => {
       <PremiumModal
         isOpen={showPremiumModal}
         onClose={() => setShowPremiumModal(false)}
-        featureTitle="Marketplace Material Selling"
-        featureDesc="Upgrade to Premium to list and sell construction materials and equipment directly to active contractors."
+        featureTitle="Only Pay When a Client Contacts You"
+        featureDesc="Recharge your account and promote your construction business. Your balance is only deducted when a client contacts you."
       />
     </div>
   );

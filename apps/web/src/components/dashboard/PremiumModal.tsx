@@ -45,8 +45,8 @@ const COUNTRIES = [
 export const PremiumModal = ({
   isOpen,
   onClose,
-  featureTitle = 'Recharge Account for Pro Access',
-  featureDesc
+  featureTitle = 'Only Pay When a Client Contacts You',
+  featureDesc = 'Recharge your account and promote your construction business. Your balance is only deducted when a client contacts you.'
 }: PremiumModalProps) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -180,55 +180,18 @@ export const PremiumModal = ({
                 exit={{ opacity: 0, x: 10 }}
               >
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 rounded-full text-emerald-400 text-xs font-black uppercase tracking-wider mb-4">
-                  <Wallet size={13} />
-                  <span>No Monthly Subscription • $10+ Recharge</span>
+                <div className="inline-flex items-center gap-2 bg-[#FFC107]/20 border border-[#FFC107]/40 px-3 py-1 rounded-full text-[#FFC107] text-xs font-black uppercase tracking-wider mb-4">
+                  <Zap size={13} className="fill-[#FFC107]" />
+                  <span>GROWTH PLAN • RECHARGE ACCOUNT</span>
                 </div>
 
                 <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-2 text-white break-words">
                   {featureTitle}
                 </h3>
 
-                <p className="text-slate-300 text-xs sm:text-sm font-medium leading-relaxed mb-5 break-words">
-                  {featureDesc || 'This is not a recurring monthly subscription. Simply recharge your account with $10 or more to instantly unlock all Pro features. 100% of your deposit stays in your wallet and is only deducted as you use services.'}
+                <p className="text-slate-300 text-xs sm:text-sm font-medium leading-relaxed mb-6 break-words">
+                  {featureDesc}
                 </p>
-
-                {/* Amount Selection Box */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-5">
-                  <div className="flex items-center justify-between mb-2.5">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">
-                      Select Deposit Amount (USD)
-                    </span>
-                    <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                      $10 Minimum to Unlock Pro
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2 mb-3">
-                    {[10, 25, 50, 100].map((amt) => (
-                      <button
-                        key={amt}
-                        type="button"
-                        onClick={() => setRechargeAmount(amt)}
-                        className={`py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
-                          rechargeAmount === amt
-                            ? 'bg-[#FFC107] text-slate-950 border-[#FFC107] shadow-md shadow-yellow-500/20 scale-[1.02]'
-                            : 'bg-white/5 text-white border-white/10 hover:bg-white/10'
-                        }`}
-                      >
-                        ${amt}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] text-slate-300 pt-1 border-t border-white/5">
-                    <span>Deposit into Wallet:</span>
-                    <strong className="text-white font-black text-xs">
-                      ${rechargeAmount}.00 USD
-                      {conversion?.localAmount
-                        ? ` (≈ ${Number(conversion.localAmount).toLocaleString()} ${conversion.currency || 'XAF'})`
-                        : ''}
-                    </strong>
-                  </div>
-                </div>
 
                 {/* Feature Perks List */}
                 <div className="space-y-3 bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 mb-5">
@@ -273,30 +236,77 @@ export const PremiumModal = ({
                   </div>
                 </div>
 
-                {/* No Monthly Subscription Clarification Box */}
-                <div className="flex items-start gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 mb-6">
-                  <div className="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <CheckCircle2 size={15} />
+                {/* Wallet Access ($10+) Box */}
+                <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 mb-5 gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                      <Wallet size={16} />
+                    </div>
+                    <div className="min-w-0">
+                      <h5 className="text-xs font-black text-white">Wallet Access ($10+)</h5>
+                      <p className="text-[10px] text-emerald-200/80 leading-tight">Maintain $10+ in your wallet to unlock all Pro features automatically.</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <h5 className="text-xs font-black text-white">Pay-As-You-Grow (Zero Monthly Fees)</h5>
-                    <p className="text-[10.5px] text-emerald-200/85 leading-relaxed mt-0.5">
-                      You are <strong>never charged recurring monthly fees</strong>. Your funds stay in your account and are only deducted when a client contacts you or when you transact. Maintain a $10+ balance to keep Pro active.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     type="button"
                     onClick={() => {
                       handleClose();
                       navigate('/dashboard/finance');
                     }}
+                    className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer"
+                  >
+                    Top Up
+                  </button>
+                </div>
+
+                {/* Recharge Account Card (Replacing Monthly Subscription) */}
+                <div className="bg-[#FFC107]/10 border border-[#FFC107]/30 rounded-2xl p-4 mb-6">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-[#FFC107] block">
+                        Recharge Account (No Monthly Subscription)
+                      </span>
+                      <div className="flex items-baseline gap-2 mt-0.5">
+                        <span className="text-2xl sm:text-3xl font-black text-white">${rechargeAmount}</span>
+                        <span className="text-xs text-slate-300 font-normal">USD deposit</span>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-bold text-slate-950 bg-[#FFC107] px-3 py-1 rounded-lg shrink-0">
+                      Instant Activation
+                    </span>
+                  </div>
+
+                  {/* Quick amount picker */}
+                  <div className="grid grid-cols-4 gap-2 mb-3">
+                    {[10, 25, 50, 100].map((amt) => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => setRechargeAmount(amt)}
+                        className={`py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+                          rechargeAmount === amt
+                            ? 'bg-[#FFC107] text-slate-950 border-[#FFC107] shadow-sm scale-[1.02]'
+                            : 'bg-white/5 text-white border-white/10 hover:bg-white/10'
+                        }`}
+                      >
+                        ${amt} {amt === 10 ? '(Min)' : ''}
+                      </button>
+                    ))}
+                  </div>
+
+                  <p className="text-[10.5px] text-slate-300 leading-relaxed">
+                    100% of your deposit stays in your wallet. You are <strong>not charged monthly</strong>—your balance is only deducted when a client contacts you.
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    type="button"
+                    onClick={handleClose}
                     className="order-2 sm:order-1 flex-1 py-3.5 bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer text-center"
                   >
-                    Go to Wallet
+                    Maybe Later
                   </button>
                   <button
                     type="button"
@@ -304,7 +314,7 @@ export const PremiumModal = ({
                     className="order-1 sm:order-2 flex-2 py-3.5 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-yellow-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Zap size={14} className="fill-slate-950" />
-                    <span>Recharge ${rechargeAmount} Now</span>
+                    <span>Recharge Account (${rechargeAmount})</span>
                     <ArrowRight size={14} />
                   </button>
                 </div>

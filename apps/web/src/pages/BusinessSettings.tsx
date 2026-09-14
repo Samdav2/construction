@@ -173,7 +173,7 @@ const BusinessSettings = () => {
                 onClick={() => setPremiumModalOpen(true)}
                 className="ml-2 px-3 py-1.5 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 font-black text-[11px] rounded-xl shadow-sm transition-all cursor-pointer"
               >
-                Upgrade
+                Recharge Account
               </button>
             )}
           </div>

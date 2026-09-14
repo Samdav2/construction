@@ -144,7 +144,7 @@ const DirectoryLeads = () => {
               className="hidden sm:flex items-center gap-2 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-yellow-500/20 transition-all cursor-pointer"
             >
               <Zap size={14} className="fill-slate-950" />
-              <span>Upgrade to Premium</span>
+              <span>Recharge Account</span>
             </button>
           )}
         </header>
@@ -156,9 +156,9 @@ const DirectoryLeads = () => {
                 <Zap size={24} className="fill-[#FFC107]" />
               </div>
               <div>
-                <h4 className="font-black text-lg text-white">Public Directory Listing is a Premium Feature</h4>
+                <h4 className="font-black text-lg text-white">Only Pay When a Client Contacts You</h4>
                 <p className="text-xs text-slate-300 font-medium mt-1 leading-relaxed">
-                  Upgrade your workspace to CPROHUB Premium or maintain a minimum wallet balance of $10 to publish your business profile in search results, appear on client quote discovery, and receive direct project inquiries.
+                  Recharge your account and promote your construction business. Maintain a minimum wallet balance of $10 to publish your business profile in search results, appear on client quote discovery, and receive direct project inquiries.
                 </p>
               </div>
             </div>
@@ -166,7 +166,7 @@ const DirectoryLeads = () => {
               onClick={() => setShowPremiumModal(true)}
               className="w-full md:w-auto px-6 py-3 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-yellow-500/20 shrink-0 transition-all cursor-pointer"
             >
-              Upgrade to Premium
+              Recharge Account
             </button>
           </div>
         )}
@@ -378,8 +378,8 @@ const DirectoryLeads = () => {
         <PremiumModal
           isOpen={showPremiumModal}
           onClose={() => setShowPremiumModal(false)}
-          featureTitle="Business Directory Leads"
-          featureDesc="Upgrade to Premium to get your company listed in the global directory, publish your services, and receive verified project leads directly from clients."
+          featureTitle="Only Pay When a Client Contacts You"
+          featureDesc="Recharge your account and promote your construction business. Your balance is only deducted when a client contacts you."
         />
       </div>
     </DashboardShell>
