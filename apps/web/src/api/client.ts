@@ -1,9 +1,9 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { getApiBaseUrl } from './config';
 
 const apiClient = axios.create({
-  // ✅ FIXED: Using HTTPS and CloudFront
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1',
+  baseURL: getApiBaseUrl(),
 });
 
 // 1. REQUEST INTERCEPTOR: Inject Token

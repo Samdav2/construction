@@ -36,10 +36,11 @@ interface CurrencyState {
   format: (localAmount: number) => string;
 }
 
+import { getApiBaseUrl } from '../api/config';
+
 const DEFAULT_CURRENCY = SUPPORTED_CURRENCIES[0]; // XAF
 
-// ✅ FIXED: Using HTTPS and CloudFront
-const API_URL = import.meta.env.VITE_API_URL || 'https://d12e8wwao0hlhx.cloudfront.net/api/v1';
+const API_URL = getApiBaseUrl();
 
 export const useCurrencyStore = create<CurrencyState>()(
   persist(

@@ -12,7 +12,7 @@
     "build": "npm --prefix apps/web run build && npm --prefix apps/api run build",
     "start:api": "npm --prefix apps/api start",
     "start:web": "npm --prefix apps/web start",
-    "start": "node apps/api/dist/server.js",
+    "start": "node start.js",
     "dev:api": "npm --prefix apps/api run dev",
     "dev:web": "npm --prefix apps/web run dev"
   },

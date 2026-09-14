@@ -1,11 +1,12 @@
 import { io, Socket } from 'socket.io-client';
+import { getSocketUrl } from '../api/config';
 
 let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (socket) return socket;
 
-  const url = import.meta.env.VITE_SOCKET_URL || window.location.origin.replace(/:\d+$/, ':5000');
+  const url = getSocketUrl();
 
   socket = io(url, {
     transports: ['websocket'],

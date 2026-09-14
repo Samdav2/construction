@@ -1,10 +1,10 @@
 import axios from 'axios';
+import { getApiBaseUrl } from './config';
 
 // Dedicated client for the worker portal — uses 'workerToken' so it never
 // touches the manager session's 'token' in localStorage.
 const workerClient = axios.create({
-  // ✅ FIXED: Using HTTPS and CloudFront
-  baseURL: import.meta.env.VITE_API_URL || 'https://d12e8wwao0hlhx.cloudfront.net/api/v1',
+  baseURL: getApiBaseUrl(),
 });
 
 workerClient.interceptors.request.use((config) => {
