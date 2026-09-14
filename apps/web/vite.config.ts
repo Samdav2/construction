@@ -11,8 +11,17 @@ export default defineConfig(({ mode }) => {
   const localEnv = loadEnv(mode, __dirname, ['VITE_', 'BACKEND_', 'API_']);
   const mergedEnv = { ...rootEnv, ...localEnv, ...process.env };
 
-  const resolvedApiUrl = mergedEnv.VITE_API_URL || mergedEnv.BACKEND_URL || mergedEnv.API_URL || '';
-  const resolvedSocketUrl = mergedEnv.VITE_SOCKET_URL || mergedEnv.SOCKET_URL || '';
+  const rawApiUrl = mergedEnv.VITE_API_URL || mergedEnv.BACKEND_URL || mergedEnv.API_URL || '';
+  const rawSocketUrl = mergedEnv.VITE_SOCKET_URL || mergedEnv.SOCKET_URL || '';
+
+  // In production builds, ignore localhost values so browser dynamically uses live backend
+  const isProduction = mode === 'production';
+  const resolvedApiUrl = (isProduction && (rawApiUrl.includes('localhost') || rawApiUrl.includes('127.0.0.1')))
+    ? ''
+    : rawApiUrl;
+  const resolvedSocketUrl = (isProduction && (rawSocketUrl.includes('localhost') || rawSocketUrl.includes('127.0.0.1')))
+    ? ''
+    : rawSocketUrl;
 
   return {
     define: {

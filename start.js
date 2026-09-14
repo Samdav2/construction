@@ -19,23 +19,73 @@ const isWeb = serviceType === 'web' ||
               serviceName.includes('frontend') ||
               serviceName.includes('client');
 
-if (isWeb) {
-  const port = process.env.PORT || '3000';
-  console.log(`🚀 [Launcher] Starting Cpro Hub Web Frontend (SPA) on port ${port}...`);
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
+  '.mjs': 'application/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.webmanifest': 'application/manifest+json'
+};
 
+if (isWeb) {
+  const port = parseInt(process.env.PORT || '3000', 10);
   const distPath = path.resolve(__dirname, 'apps/web/dist');
-  if (!fs.existsSync(distPath)) {
+  const indexHtml = path.join(distPath, 'index.html');
+
+  if (!fs.existsSync(distPath) || !fs.existsSync(indexHtml)) {
     console.error(`❌ [Launcher] Error: "${distPath}" not found. Did the build step run?`);
     process.exit(1);
   }
 
-  const serveProcess = spawn('npx', ['--yes', 'serve', '-s', 'apps/web/dist', '-l', port], {
-    stdio: 'inherit',
-    shell: true
+  const http = require('http');
+  const server = http.createServer((req, res) => {
+    // Health check endpoint for Railway
+    if (req.url === '/health') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ status: 'ok', service: 'cprohub-web' }));
+    }
+
+    // Sanitize path to prevent directory traversal
+    const urlPath = req.url.split('?')[0];
+    let safePath = path.normalize(urlPath).replace(/^(\.\.[\/\\])+/, '');
+    if (safePath === '/' || safePath === '') safePath = '/index.html';
+
+    const filePath = path.join(distPath, safePath);
+
+    fs.stat(filePath, (err, stats) => {
+      if (!err && stats.isFile()) {
+        const ext = path.extname(filePath).toLowerCase();
+        const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+        const cacheControl = ext === '.html' ? 'no-cache' : 'public, max-age=31536000, immutable';
+        res.writeHead(200, {
+          'Content-Type': contentType,
+          'Cache-Control': cacheControl
+        });
+        fs.createReadStream(filePath).pipe(res);
+      } else {
+        // SPA Fallback: serve index.html for client-side routes
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        });
+        fs.createReadStream(indexHtml).pipe(res);
+      }
+    });
   });
 
-  serveProcess.on('exit', (code) => {
-    process.exit(code || 0);
+  server.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 [Launcher] Cpro Hub Web Frontend is live on port ${port}!`);
+    console.log(`🌐 [Launcher] Serving production build from: ${distPath}`);
   });
 } else {
   console.log('🚀 [Launcher] Starting Cpro Hub API Backend Engine...');

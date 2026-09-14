@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "start": "npx --yes serve -s dist -l ${PORT:-3000}",
-    "serve": "npx --yes serve -s dist -l ${PORT:-3000}",
+    "start": "node serve.cjs",
+    "serve": "node serve.cjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

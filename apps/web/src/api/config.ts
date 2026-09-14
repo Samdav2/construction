@@ -19,23 +19,36 @@ const normalizeApiUrl = (url: string): string => {
 };
 
 export const getApiBaseUrl = (): string => {
+  const isBrowser = typeof window !== 'undefined';
+  const isLiveDomain = isBrowser &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1' &&
+    window.location.hostname !== '0.0.0.0';
+
   // 1. Explicit Vite build environment variable
+  // If running in a live browser, ignore any build-time localhost fallback
   const buildEnvUrl = import.meta.env.VITE_API_URL;
   if (buildEnvUrl && typeof buildEnvUrl === 'string' && buildEnvUrl.trim() !== '') {
-    return normalizeApiUrl(buildEnvUrl);
+    const isLocalUrl = buildEnvUrl.includes('localhost') || buildEnvUrl.includes('127.0.0.1');
+    if (!isLiveDomain || !isLocalUrl) {
+      return normalizeApiUrl(buildEnvUrl);
+    }
   }
 
   // 2. Runtime window injection (allows runtime override without rebuilding)
-  if (typeof window !== 'undefined') {
+  if (isBrowser) {
     const winEnv = (window as any).__ENV__?.VITE_API_URL || (window as any).__ENV__?.API_URL;
     if (winEnv && typeof winEnv === 'string' && winEnv.trim() !== '') {
-      return normalizeApiUrl(winEnv);
+      const isLocalUrl = winEnv.includes('localhost') || winEnv.includes('127.0.0.1');
+      if (!isLiveDomain || !isLocalUrl) {
+        return normalizeApiUrl(winEnv);
+      }
     }
 
     const { hostname, origin } = window.location;
 
     // 3. Local development only
-    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0') {
+    if (!isLiveDomain) {
       return 'http://localhost:5000/api/v1';
     }
 
@@ -70,23 +83,35 @@ export const getApiBaseUrl = (): string => {
 };
 
 export const getSocketUrl = (): string => {
+  const isBrowser = typeof window !== 'undefined';
+  const isLiveDomain = isBrowser &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1' &&
+    window.location.hostname !== '0.0.0.0';
+
   // 1. Explicit Vite build environment variable
   const buildSocketUrl = import.meta.env.VITE_SOCKET_URL;
   if (buildSocketUrl && typeof buildSocketUrl === 'string' && buildSocketUrl.trim() !== '') {
-    return buildSocketUrl.trim().replace(/\/+$/, '');
+    const isLocalUrl = buildSocketUrl.includes('localhost') || buildSocketUrl.includes('127.0.0.1');
+    if (!isLiveDomain || !isLocalUrl) {
+      return buildSocketUrl.trim().replace(/\/+$/, '');
+    }
   }
 
   // 2. Runtime window injection
-  if (typeof window !== 'undefined') {
+  if (isBrowser) {
     const winSocket = (window as any).__ENV__?.VITE_SOCKET_URL || (window as any).__ENV__?.SOCKET_URL;
     if (winSocket && typeof winSocket === 'string' && winSocket.trim() !== '') {
-      return winSocket.trim().replace(/\/+$/, '');
+      const isLocalUrl = winSocket.includes('localhost') || winSocket.includes('127.0.0.1');
+      if (!isLiveDomain || !isLocalUrl) {
+        return winSocket.trim().replace(/\/+$/, '');
+      }
     }
 
-    const { hostname, origin } = window.location;
+    const { origin } = window.location;
 
     // 3. Local development only
-    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0') {
+    if (!isLiveDomain) {
       return origin.replace(/:\d+$/, ':5000');
     }
 
