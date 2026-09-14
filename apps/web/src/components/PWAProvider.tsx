@@ -151,9 +151,21 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const isInstallable = !isStandalone;
-  const isCpromarkLanding = location.pathname === '/';
-  const appName = isCpromarkLanding ? 'Cpromark' : 'Cpro Hub';
-  const appLogo = isCpromarkLanding ? '/cpromark-logo.png' : '/cprohub-logo.png';
+
+  const hostname = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+  const search = typeof window !== 'undefined' ? window.location.search.toLowerCase() : '';
+
+  const isCproHub =
+    location.pathname.startsWith('/cprohub') ||
+    hostname === 'cprohub.cpromark.com' ||
+    hostname.startsWith('cprohub.') ||
+    hostname.includes('cprohub') ||
+    search.includes('view=cprohub') ||
+    import.meta.env.VITE_DEFAULT_LANDING === 'cprohub';
+
+  const isCpromarkPage = location.pathname === '/cpromark' || (location.pathname === '/' && !isCproHub);
+  const appName = isCproHub ? 'Cpro Hub' : (isCpromarkPage ? 'Cpromark' : 'Cpro Hub');
+  const appLogo = isCproHub ? '/cprohub-logo.png' : (isCpromarkPage ? '/cpromark-logo.png' : '/cprohub-logo.png');
 
   return (
     <PWAContext.Provider
@@ -171,7 +183,7 @@ export const PWAProvider = ({ children }: { children: React.ReactNode }) => {
       {/* Non-Blocking Top-Left Installation Popover */}
       <AnimatePresence>
         {showPopup && (
-          <div className={`fixed top-16 sm:top-20 left-3 sm:left-6 z-[9999] pointer-events-auto ${location.pathname === '/cprohub' && !showInstructions ? 'hidden md:block' : ''}`}>
+          <div className={`fixed top-16 sm:top-20 left-3 sm:left-6 z-[9999] pointer-events-auto ${(location.pathname === '/cprohub' || isCproHub) && !showInstructions ? 'hidden md:block' : ''}`}>
             {/* Popover Form Card */}
             <motion.div
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
