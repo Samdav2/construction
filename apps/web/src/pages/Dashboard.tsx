@@ -5,7 +5,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DashboardShell } from '../components/layout/DashboardShell';
 import { useAuthStore } from '../store/useAuthStore';
 import { useOnboardingStore } from '../store/useOnboardingStore';
-import { useCurrencyStore } from '../store/useCurrencyStore';
 import { TourModal } from '../components/dashboard/TourModal';
 import { PremiumBanner } from '../components/dashboard/PremiumBanner';
 import { PremiumModal } from '../components/dashboard/PremiumModal';
@@ -116,7 +115,6 @@ const DashboardCard = ({
 const Dashboard = () => {
   const { user } = useAuthStore();
   const { getHasSeenTour } = useOnboardingStore();
-  const { format } = useCurrencyStore();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
@@ -176,11 +174,11 @@ const Dashboard = () => {
   const isPremium = plan === 'pro' || plan === 'enterprise' || hasWalletAccess;
 
   const formattedBalance = useMemo(() => {
-    if (balance !== null && format) {
-      return format(balance);
+    if (balance !== null) {
+      return `$${Number(balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
     return 'Loading...';
-  }, [balance, format]);
+  }, [balance]);
 
   // Check if business profile needs setup
   const isProfileIncomplete = company && (!company.city || !company.phone || !company.address);

@@ -456,10 +456,10 @@ const Wallet = () => {
             ) : (
               <div>
                 <p className="text-5xl font-black text-foreground tracking-tighter mb-1">
-                  {balance.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                  <span className="text-2xl text-foreground/40 ml-2">{currency}</span>
+                  ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  <span className="text-2xl text-foreground/40 ml-2">USD</span>
                 </p>
-                <p className="text-sm text-foreground/40 font-medium">{format(balance)}</p>
+                <p className="text-sm text-foreground/40 font-medium">≈ {format(balance)} local equivalent</p>
               </div>
             )}
           </motion.div>

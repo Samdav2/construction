@@ -14,10 +14,8 @@ import {
   CheckCircle2,
   Lock,
   Globe,
-  Radar,
-  Wallet
+  Radar
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../../api/client';
 import toast from 'react-hot-toast';
@@ -48,7 +46,6 @@ export const PremiumModal = ({
   featureTitle = 'Only Pay When a Client Contacts You',
   featureDesc = 'Recharge your account and promote your construction business. Your balance is only deducted when a client contacts you.'
 }: PremiumModalProps) => {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [step, setStep] = useState<'overview' | 'checkout' | 'verifying'>('overview');
   const [rechargeAmount, setRechargeAmount] = useState<number>(10);
@@ -141,7 +138,7 @@ export const PremiumModal = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2.5 sm:p-4">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -153,11 +150,11 @@ export const PremiumModal = ({
 
           {/* Modal Container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 20 }}
+            initial={{ opacity: 0, scale: 0.94, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 20 }}
+            exit={{ opacity: 0, scale: 0.94, y: 15 }}
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-            className="relative w-full max-w-lg bg-[#071426] text-white border border-white/20 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] rounded-[2.5rem] overflow-hidden p-6 sm:p-8 select-none max-h-[90vh] overflow-y-auto"
+            className="relative w-full max-w-lg bg-[#071426] text-white border border-white/20 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] rounded-[1.75rem] sm:rounded-[2.5rem] p-4 sm:p-7 select-none max-h-[92dvh] overflow-y-auto overscroll-contain flex flex-col my-auto"
           >
             {/* Glow Highlights */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFC107]/15 blur-[80px] rounded-full pointer-events-none" />
@@ -166,7 +163,7 @@ export const PremiumModal = ({
             {/* Close Button */}
             <button
               onClick={handleClose}
-              className="absolute top-5 right-5 p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer z-10"
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer z-20"
               aria-label="Close"
             >
               <X size={18} />
@@ -178,106 +175,84 @@ export const PremiumModal = ({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
+                className="flex flex-col flex-1"
               >
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 bg-[#FFC107]/20 border border-[#FFC107]/40 px-3 py-1 rounded-full text-[#FFC107] text-xs font-black uppercase tracking-wider mb-4">
-                  <Zap size={13} className="fill-[#FFC107]" />
+                <div className="inline-flex items-center gap-1.5 bg-[#FFC107]/20 border border-[#FFC107]/40 px-3 py-1 rounded-full text-[#FFC107] text-[11px] font-black uppercase tracking-wider mb-2.5 w-fit">
+                  <Zap size={12} className="fill-[#FFC107]" />
                   <span>GROWTH PLAN • RECHARGE ACCOUNT</span>
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-2 text-white break-words">
+                <h3 className="text-lg sm:text-2xl font-black tracking-tight mb-1 text-white break-words pr-6">
                   {featureTitle}
                 </h3>
 
-                <p className="text-slate-300 text-xs sm:text-sm font-medium leading-relaxed mb-6 break-words">
+                <p className="text-slate-300 text-[11.5px] sm:text-sm font-medium leading-relaxed mb-3 sm:mb-4 break-words">
                   {featureDesc}
                 </p>
 
                 {/* Feature Perks List */}
-                <div className="space-y-3 bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 mb-5">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                      <Building2 size={16} />
+                <div className="space-y-2 sm:space-y-2.5 bg-white/5 border border-white/10 rounded-2xl p-3 sm:p-4 mb-3 sm:mb-4">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                      <Building2 size={14} />
                     </div>
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-black text-white">Public Directory Listing</h4>
-                      <p className="text-[11px] text-slate-300">Publish your verified company profile and receive inbound client leads.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 border-t border-white/10 pt-3">
-                    <div className="w-8 h-8 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center shrink-0">
-                      <Store size={16} />
-                    </div>
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-black text-white">Marketplace Material Selling</h4>
-                      <p className="text-[11px] text-slate-300">List and sell building materials and machinery across Africa.</p>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-xs sm:text-sm font-black text-white leading-tight">Public Directory Listing</h4>
+                      <p className="text-[10.5px] sm:text-[11px] text-slate-300 leading-snug">Publish your verified company profile and receive inbound client leads.</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3 border-t border-white/10 pt-3">
-                    <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
-                      <Radar size={16} />
+                  <div className="flex items-start gap-2.5 border-t border-white/10 pt-2 sm:pt-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center shrink-0 mt-0.5">
+                      <Store size={14} />
                     </div>
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-black text-white">Lead &amp; Tender Scraper</h4>
-                      <p className="text-[11px] text-slate-300">Scrape live project tenders, contractor opportunities, and construction jobs.</p>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-xs sm:text-sm font-black text-white leading-tight">Marketplace Material Selling</h4>
+                      <p className="text-[10.5px] sm:text-[11px] text-slate-300 leading-snug">List and sell building materials and machinery across Africa.</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3 border-t border-white/10 pt-3">
-                    <div className="w-8 h-8 rounded-xl bg-[#FFC107]/20 text-[#FFC107] flex items-center justify-center shrink-0">
-                      <ShieldCheck size={16} />
+                  <div className="flex items-start gap-2.5 border-t border-white/10 pt-2 sm:pt-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0 mt-0.5">
+                      <Radar size={14} />
                     </div>
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-black text-white">Verified Builder Badge</h4>
-                      <p className="text-[11px] text-slate-300">Stand out with verified contractor credentials on all project bids.</p>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-xs sm:text-sm font-black text-white leading-tight">Lead &amp; Tender Scraper</h4>
+                      <p className="text-[10.5px] sm:text-[11px] text-slate-300 leading-snug">Scrape live project tenders, contractor opportunities, and construction jobs.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 border-t border-white/10 pt-2 sm:pt-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-[#FFC107]/20 text-[#FFC107] flex items-center justify-center shrink-0 mt-0.5">
+                      <ShieldCheck size={14} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-xs sm:text-sm font-black text-white leading-tight">Verified Builder Badge</h4>
+                      <p className="text-[10.5px] sm:text-[11px] text-slate-300 leading-snug">Stand out with verified contractor credentials on all project bids.</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Wallet Access ($10+) Box */}
-                <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 mb-5 gap-3">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                      <Wallet size={16} />
-                    </div>
-                    <div className="min-w-0">
-                      <h5 className="text-xs font-black text-white">Wallet Access ($10+)</h5>
-                      <p className="text-[10px] text-emerald-200/80 leading-tight">Maintain $10+ in your wallet to unlock all Pro features automatically.</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleClose();
-                      navigate('/dashboard/finance');
-                    }}
-                    className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shrink-0 cursor-pointer"
-                  >
-                    Top Up
-                  </button>
-                </div>
-
-                {/* Recharge Account Card (Replacing Monthly Subscription) */}
-                <div className="bg-[#FFC107]/10 border border-[#FFC107]/30 rounded-2xl p-4 mb-6">
-                  <div className="flex items-center justify-between mb-2.5">
+                {/* Recharge Account Card (Clean & Prominent) */}
+                <div className="bg-[#FFC107]/10 border border-[#FFC107]/35 rounded-2xl p-3 sm:p-4 mb-3 sm:mb-4">
+                  <div className="flex items-center justify-between gap-2 mb-2">
                     <div>
-                      <span className="text-[10px] font-black uppercase tracking-wider text-[#FFC107] block">
-                        Recharge Account (No Monthly Subscription)
+                      <span className="text-[9.5px] font-black uppercase tracking-wider text-[#FFC107] block">
+                        Recharge Account (No Monthly Fees)
                       </span>
                       <div className="flex items-baseline gap-2 mt-0.5">
-                        <span className="text-2xl sm:text-3xl font-black text-white">${rechargeAmount}</span>
-                        <span className="text-xs text-slate-300 font-normal">USD deposit</span>
+                        <span className="text-xl sm:text-2xl font-black text-white">${rechargeAmount}</span>
+                        <span className="text-[11px] text-emerald-400 font-bold">100% in your wallet</span>
                       </div>
                     </div>
-                    <span className="text-[11px] font-bold text-slate-950 bg-[#FFC107] px-3 py-1 rounded-lg shrink-0">
-                      Instant Activation
+                    <span className="text-[10px] font-black text-slate-950 bg-[#FFC107] px-2.5 py-1 rounded-lg shrink-0">
+                      Instant Pro Unlock
                     </span>
                   </div>
 
                   {/* Quick amount picker */}
-                  <div className="grid grid-cols-4 gap-2 mb-3">
+                  <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-2">
                     {[10, 25, 50, 100].map((amt) => (
                       <button
                         key={amt}
@@ -294,29 +269,31 @@ export const PremiumModal = ({
                     ))}
                   </div>
 
-                  <p className="text-[10.5px] text-slate-300 leading-relaxed">
-                    100% of your deposit stays in your wallet. You are <strong>not charged monthly</strong>—your balance is only deducted when a client contacts you.
+                  <p className="text-[10px] sm:text-[10.5px] text-slate-300 leading-relaxed">
+                    Maintain a <strong>$10+ wallet balance</strong> to keep Pro active. Zero monthly subscription fees—your deposit is only deducted when a client contacts you.
                   </p>
                 </div>
 
-                {/* Actions */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button
-                    type="button"
-                    onClick={handleClose}
-                    className="order-2 sm:order-1 flex-1 py-3.5 bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer text-center"
-                  >
-                    Maybe Later
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setStep('checkout')}
-                    className="order-1 sm:order-2 flex-2 py-3.5 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-yellow-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Zap size={14} className="fill-slate-950" />
-                    <span>Recharge Account (${rechargeAmount})</span>
-                    <ArrowRight size={14} />
-                  </button>
+                {/* Sticky Action Footer */}
+                <div className="sticky bottom-0 bg-[#071426]/95 backdrop-blur-md pt-2 pb-1 -mx-4 -mb-4 px-4 sm:-mx-7 sm:-mb-7 sm:px-7 border-t border-white/10 mt-auto">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      type="button"
+                      onClick={handleClose}
+                      className="order-2 sm:order-1 flex-1 py-2.5 sm:py-3 bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white rounded-xl sm:rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer text-center"
+                    >
+                      Maybe Later
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStep('checkout')}
+                      className="order-1 sm:order-2 flex-2 py-2.5 sm:py-3 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 rounded-xl sm:rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-yellow-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Zap size={14} className="fill-slate-950" />
+                      <span>Recharge Account (${rechargeAmount})</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -327,21 +304,22 @@ export const PremiumModal = ({
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
+                className="flex flex-col flex-1"
               >
-                <div className="flex items-center gap-2 text-slate-400 mb-4 cursor-pointer hover:text-white transition-colors" onClick={() => setStep('overview')}>
+                <div className="flex items-center gap-2 text-slate-400 mb-3 cursor-pointer hover:text-white transition-colors" onClick={() => setStep('overview')}>
                   <ArrowLeft size={16} />
                   <span className="text-xs font-bold uppercase tracking-wider">Back to Overview</span>
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-black tracking-tight mb-1 text-white">
+                <h3 className="text-lg sm:text-2xl font-black tracking-tight mb-1 text-white">
                   Recharge Account (${rechargeAmount} USD)
                 </h3>
-                <p className="text-slate-300 text-xs font-medium mb-5">
-                  Select your payment country and enter your Mobile Money (MTN / Orange) or Card phone number. Your deposit will be credited directly to your wallet.
+                <p className="text-slate-300 text-xs font-medium mb-4">
+                  Select your country and enter your Mobile Money (MTN / Orange) or Card number.
                 </p>
 
                 {/* Country selector */}
-                <div className="space-y-1.5 mb-5">
+                <div className="space-y-1 mb-3.5">
                   <label className="text-[10px] font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                     <Globe size={13} className="text-[#FFC107]" />
                     <span>Payment Country & Currency</span>
@@ -349,7 +327,7 @@ export const PremiumModal = ({
                   <select
                     value={selectedCountry}
                     onChange={(e) => setSelectedCountry(e.target.value)}
-                    className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/15 text-white text-xs font-bold outline-none focus:border-[#FFC107] transition-all cursor-pointer"
+                    className="w-full p-3 rounded-xl sm:rounded-2xl bg-white/5 border border-white/15 text-white text-xs font-bold outline-none focus:border-[#FFC107] transition-all cursor-pointer"
                   >
                     {COUNTRIES.map((c) => (
                       <option key={c.code} value={c.code} className="bg-[#071426] text-white">
@@ -360,7 +338,7 @@ export const PremiumModal = ({
                 </div>
 
                 {/* Mobile Money / Phone Number */}
-                <div className="space-y-1.5 mb-5">
+                <div className="space-y-1 mb-3.5">
                   <label className="text-[10px] font-black uppercase tracking-wider text-slate-300 block">
                     Mobile Money / Phone Number
                   </label>
@@ -369,17 +347,17 @@ export const PremiumModal = ({
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     placeholder="e.g. 670123456 or +237670123456"
-                    className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/15 text-white placeholder-white/30 text-xs font-semibold outline-none focus:border-[#FFC107] transition-all"
+                    className="w-full p-3 rounded-xl sm:rounded-2xl bg-white/5 border border-white/15 text-white placeholder-white/30 text-xs font-semibold outline-none focus:border-[#FFC107] transition-all"
                   />
                 </div>
 
                 {/* Converted Amount Summary Box */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-slate-400 font-semibold">Recharge Deposit:</span>
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-3 sm:p-4 mb-4">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs text-slate-400 font-semibold">Deposit:</span>
                     <span className="text-xs font-black text-white">${rechargeAmount}.00 USD</span>
                   </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                  <div className="flex items-center justify-between pt-1.5 border-t border-white/10">
                     <span className="text-xs text-slate-300 font-bold">Estimated Local Total:</span>
                     <span className="text-base sm:text-lg font-black text-[#FFC107]">
                       {conversion?.localAmount
@@ -387,40 +365,42 @@ export const PremiumModal = ({
                         : `≈ ${(rechargeAmount * 600).toLocaleString()} XAF`}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 mt-3 pt-2 text-[10px] text-slate-400 border-t border-white/5">
+                  <div className="flex items-center gap-1.5 mt-2 pt-1.5 text-[9.5px] text-slate-400 border-t border-white/5">
                     <Lock size={11} className="text-emerald-400 shrink-0" />
                     <span>Secure 256-bit encrypted checkout via Swychr / AccountPe. Zero recurring fees.</span>
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setStep('overview')}
-                    className="flex-1 py-3.5 bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer text-center"
-                  >
-                    Back
-                  </button>
-                  <button
-                    type="button"
-                    disabled={initiateMutation.isPending}
-                    onClick={handleStartCheckout}
-                    className="flex-2 py-3.5 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-yellow-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                  >
-                    {initiateMutation.isPending ? (
-                      <>
-                        <Loader2 className="animate-spin" size={16} />
-                        <span>Redirecting to Swychr…</span>
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard size={16} />
-                        <span>Pay ${rechargeAmount} with Swychr</span>
-                        <ExternalLink size={13} />
-                      </>
-                    )}
-                  </button>
+                {/* Sticky Action Buttons */}
+                <div className="sticky bottom-0 bg-[#071426]/95 backdrop-blur-md pt-2 pb-1 -mx-4 -mb-4 px-4 sm:-mx-7 sm:-mb-7 sm:px-7 border-t border-white/10 mt-auto">
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setStep('overview')}
+                      className="flex-1 py-2.5 sm:py-3 bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white rounded-xl sm:rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer text-center"
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="button"
+                      disabled={initiateMutation.isPending}
+                      onClick={handleStartCheckout}
+                      className="flex-2 py-2.5 sm:py-3 bg-[#FFC107] hover:bg-[#e5ac04] text-slate-950 rounded-xl sm:rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-yellow-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                      {initiateMutation.isPending ? (
+                        <>
+                          <Loader2 className="animate-spin" size={16} />
+                          <span>Redirecting…</span>
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard size={15} />
+                          <span>Pay ${rechargeAmount}</span>
+                          <ExternalLink size={12} />
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}
